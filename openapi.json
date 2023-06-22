@@ -1,0 +1,701 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "LabApiGateway",
+    "version": "1.0.0",
+    "description": "The entrypoint for all services created by the data science team."
+  },
+  "servers": [
+    {
+      "url": "https://brvw7rouq9.execute-api.eu-west-1.amazonaws.com/{basePath}",
+      "description": "Staging server.",
+      "variables": {
+        "basePath": {
+          "default": "dev"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/search/v1/indexing-status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "node_uuid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-IntelligentSearch-IndexingStatusQueryingLa-smEFC4cQ1fgJ/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/searchIndexingStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search/v1/search": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/searchQuery"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-IntelligentSearch-IntelligentSearchLambda6-xs6XNxu80s5s/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/searchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/concept_tracks/v1/files/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "e4cc04f3-f5ed-49f1-be63-482204f14180"
+          }
+        ],
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-concept-tracks-concepttrackendpointslambda-y6iDgE074dpC/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conceptTracksIndexingStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/concept_tracks/v1/files/nodes": {
+      "get": {
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "e4cc04f3-f5ed-49f1-be63-482204f14180"
+          },
+          {
+            "name": "node_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "f976ab31-e9f7-425e-a3d4-13189d92dac9"
+          }
+        ],
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-concept-tracks-concepttrackendpointslambda-y6iDgE074dpC/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/conceptTracksNodeSuggestionsResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/conceptTracksNodeDetailsResponse"
+                    }
+                  ]
+                },
+                "examples": {
+                  "node_suggestion_response": {
+                    "value": {
+                      "title": "sun dog",
+                      "id": "e4cc04f3-f5ed-49f1-be63-482204f14180",
+                      "pages": [
+                        0
+                      ]
+                    }
+                  },
+                  "node_detail_response": {
+                    "value": {
+                      "title": "sun dog",
+                      "id": "e4cc04f3-f5ed-49f1-be63-482204f14180",
+                      "pages": [
+                        "..."
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/concept-tracks/v1/models": {
+      "get": {
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "e4cc04f3-f5ed-49f1-be63-482204f14180"
+          }
+        ],
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-concept-tracks-concepttrackendpointslambda-y6iDgE074dpC/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conceptTracksModelRequestResponse"
+                },
+                "examples": {
+                  "models_response_with_default": {
+                    "value": {
+                      "id": "e4cc04f3-f5ed-49f1-be63-482204f14180",
+                      "name": "LDA",
+                      "description": "desc",
+                      "default": true
+                    }
+                  },
+                  "models_response_without_default": {
+                    "value": {
+                      "id": "fe111234-f5ed-49f1-be63-482204f14180",
+                      "name": "Transformers",
+                      "description": "desc"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/question_generation/v1": {
+      "post": {
+        "requestBody": {
+          "description": "Endpoint for the question generation service",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/questionGenerationQuery"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-QGCdkStack-QuestionGenerationLambdaB5F6D33-ASsGg7bsslnl/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/questionGenerationResponseMultipleQuestions"
+                    },
+                    {
+                      "$ref": "#/components/schemas/questionGenerationResponseMCQs"
+                    }
+                  ]
+                },
+                "examples": {
+                  "mcq_response": {
+                    "value": {
+                      "question": "Which theory did Darwin discover?",
+                      "mcq_answers": [
+                        "Evolution.",
+                        "Evaluation.",
+                        "Optimization.",
+                        "Quantization."
+                      ],
+                      "correct_answer": "Evolution.",
+                      "explanation": "Darwin uncovered the theory of evolution."
+                    }
+                  },
+                  "non-mcq_response": {
+                    "value": {
+                      "questions": [
+                        "What is a corpus?",
+                        "How the corpus should be constructed?",
+                        "What data is used to build the corpus?"
+                      ],
+                      "answers": [
+                        "A corpus is a collection of linguistic data.",
+                        "It should be constructed so as to be balanced and representative.",
+                        "Linguistic data which was not originally produced for the process of linguistic analysis."
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "x-amazon-apigateway-any-method": {
+        "x-amazon-apigateway-integration": {
+          "type": "mock",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "searchIndexingStatusResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_found",
+              "in_progress",
+              "success",
+              "failed",
+              "removed"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "example": {
+          "status": "in_progress"
+        }
+      },
+      "searchQuery": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "string"
+          },
+          "organization": {
+            "type": "string"
+          },
+          "knowledge_spaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "node_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "query": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "user": "Puma",
+          "organization": 1,
+          "knowledge_spaces": [],
+          "node_types": [],
+          "query": ""
+        }
+      },
+      "searchResultsResponse": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string"
+          },
+          "node_uuid": {
+            "type": "string"
+          },
+          "node_kind": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "format": "float64"
+          },
+          "original_text": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "start": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "end": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "match": {
+            "type": "string"
+          }
+        }
+      },
+      "searchResponse": {
+        "type": "object",
+        "properties": {
+          "num_results": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "exec_time": {
+            "type": "number",
+            "format": "float64"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/searchResultsResponse"
+            }
+          }
+        },
+        "example": {
+          "name": "Puma",
+          "id": 1
+        }
+      },
+      "conceptTracksIndexingStatusResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "in_progress",
+              "success",
+              "failed"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "example": {
+          "status": "in_progress"
+        }
+      },
+      "conceptTracksNodeDetail": {
+        "type": "object",
+        "properties": {
+          "node_title": {
+            "type": "string"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "example": {
+          "node_title": "This is a node",
+          "keywords": [
+            "keyword1",
+            "keyword2"
+          ],
+          "coordinates": [
+            [
+              1,
+              2,
+              3,
+              4
+            ],
+            [
+              5,
+              6,
+              7,
+              8
+            ]
+          ]
+        }
+      },
+      "conceptTracksNodeSuggestion": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "$ref": "#/components/schemas/conceptTracksNodeDetail"
+                }
+              ]
+            }
+          }
+        },
+        "example": {
+          "title": "Sun dog",
+          "id": "e4cc04f3-f5ed-49f1-be63-482204f14180",
+          "pages": [
+            0
+          ]
+        }
+      },
+      "conceptTracksNodeSuggestionsResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/conceptTracksNodeSuggestion"
+        }
+      },
+      "conceptTracksNodeDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "example": {
+          "status": "in_progress"
+        }
+      },
+      "conceptTracksModelRequestResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "example": {
+          "status": "in_progress"
+        }
+      },
+      "questionGenerationQuery": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "request_type": {
+            "type": "string",
+            "enum": [
+              "multiple_questions",
+              "fill_in_blanks",
+              "mcq"
+            ]
+          }
+        },
+        "required": [
+          "text",
+          "request_type"
+        ],
+        "example": {
+          "text": "The North East Line is a high-capacity Mass Rapid Transit (MRT) line in Singapore. Operated by SBS Transit, the 20-kilometre (12 mi) line runs from HarbourFront station in southern Singapore to Punggol station in the northeast via Chinatown, Little India, Serangoon and Hougang. Completed at a cost of S$5 billion, the line began operating 14 of its 16 stations on 20 June 2003.",
+          "request_type": "mcq"
+        }
+      },
+      "questionGenerationResponseMultipleQuestions": {
+        "type": "object",
+        "properties": {
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "questions",
+          "answers"
+        ],
+        "example": {
+          "questions": [
+            "What is a corpus?",
+            "How the corpus should be constructed?",
+            "What data is used to build the corpus?"
+          ],
+          "answers": [
+            "A corpus is a collection of linguistic data.",
+            "It should be constructed so as to be balanced and representative.",
+            "Linguistic data which was not originally produced for the process of linguistic analysis."
+          ]
+        }
+      },
+      "questionGenerationResponseMCQs": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "mcq_answers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "correct_answer": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "mcq_answers",
+          "correct_answer",
+          "explanation"
+        ],
+        "example": {
+          "question": "Which theory did Darwin discover?",
+          "mcq_answers": [
+            "Evolution.",
+            "Evaluation.",
+            "Optimization.",
+            "Quantization."
+          ],
+          "correct_answer": "Evolution.",
+          "explanation": "Darwin uncovered the theory of evolution."
+        }
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "x-api-key",
+        "in": "header"
+      }
+    }
+  }
+}

@@ -83,39 +83,39 @@ class LambdaFunc(Construct):
             integration=apigw.LambdaIntegration(api_docs_func)
         )
 
-        # Sample API Lambda
-        sample_func = lambda_.Function(
-            self,
-            "SampleLambda",
-            function_name="SampleFunc",
-            handler="lambda_handler.handler",
-            runtime=lambda_.Runtime.PYTHON_3_9,
-            code=lambda_.Code.from_asset('lambdas/python'),
-            vpc=vpc,
-            vpc_subnets=ec2.SubnetSelection(
-                subnet_type=ec2.SubnetType.PRIVATE_WITH_NAT
-            ),
-            security_groups=[sg]
-        )
-
-        # Integrate Lambda to API Gateway
-        sample_api = api_gw.root.add_resource("sample")
-        sample_api.add_method(
-            http_method="GET",
-            integration=apigw.LambdaIntegration(sample_func),
-            method_responses=[
-                apigw.MethodResponse(
-                    status_code="200",
-                    response_models={
-                        "application/json": api_models.res_sample_output
-                    }
-                )
-            ],
-        )
-        sample_api.add_method(
-            http_method="POST",
-            integration=apigw.LambdaIntegration(sample_func),
-            request_models={
-                "application/json": api_models.req_sample_input
-            },
-        )
+        # # Sample API Lambda
+        # sample_func = lambda_.Function(
+        #     self,
+        #     "SampleLambda",
+        #     function_name="SampleFunc",
+        #     handler="lambda_handler.handler",
+        #     runtime=lambda_.Runtime.PYTHON_3_9,
+        #     code=lambda_.Code.from_asset('lambdas/python'),
+        #     vpc=vpc,
+        #     vpc_subnets=ec2.SubnetSelection(
+        #         subnet_type=ec2.SubnetType.PRIVATE_WITH_NAT
+        #     ),
+        #     security_groups=[sg]
+        # )
+        #
+        # # Integrate Lambda to API Gateway
+        # sample_api = api_gw.root.add_resource("sample")
+        # sample_api.add_method(
+        #     http_method="GET",
+        #     integration=apigw.LambdaIntegration(sample_func),
+        #     method_responses=[
+        #         apigw.MethodResponse(
+        #             status_code="200",
+        #             response_models={
+        #                 "application/json": api_models.res_sample_output
+        #             }
+        #         )
+        #     ],
+        # )
+        # sample_api.add_method(
+        #     http_method="POST",
+        #     integration=apigw.LambdaIntegration(sample_func),
+        #     request_models={
+        #         "application/json": api_models.req_sample_input
+        #     },
+        # )
