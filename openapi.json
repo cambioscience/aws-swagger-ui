@@ -101,7 +101,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "e4cc04f3-f5ed-49f1-be63-482204f14180"
+            "example": "lab/2fc3f792-cd71-45c7-a8dd-bd23f4639319/Sun-Dog-Car-MIX_multiple_models"
           }
         ],
         "security": [
@@ -139,7 +139,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "e4cc04f3-f5ed-49f1-be63-482204f14180"
+            "example": "lab/2fc3f792-cd71-45c7-a8dd-bd23f4639319/Sun-Dog-Car-MIX_multiple_models"
           },
           {
             "name": "node_id",
@@ -147,7 +147,15 @@
             "schema": {
               "type": "string"
             },
-            "example": "f976ab31-e9f7-425e-a3d4-13189d92dac9"
+            "example": "0ffa6f60-d8ea-48f7-a464-737c698609e7"
+          },
+          {
+            "name": "model_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "522c5bce-ba13-432c-a429-6b4e99e14c81"
           }
         ],
         "security": [
@@ -202,19 +210,8 @@
         }
       }
     },
-    "/concept-tracks/v1/models": {
+    "/concept_tracks/v1/models": {
       "get": {
-        "parameters": [
-          {
-            "name": "file_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "e4cc04f3-f5ed-49f1-be63-482204f14180"
-          }
-        ],
         "security": [
           {
             "api_key": []
