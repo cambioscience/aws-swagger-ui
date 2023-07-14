@@ -21,7 +21,7 @@
       "get": {
         "parameters": [
           {
-            "name": "node_uuid",
+            "name": "node-uuids",
             "in": "query",
             "required": true,
             "schema": {
@@ -340,23 +340,44 @@
   "components": {
     "schemas": {
       "searchIndexingStatusResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": [
-              "not_found",
-              "in_progress",
-              "success",
-              "failed",
-              "removed"
-            ]
-          }
-        },
+          "properties": {
+              "<node-uuid1-val>": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "not_found",
+                      "in_progress",
+                      "success",
+                      "failed",
+                      "removed"
+                    ]
+                  }
+                }
+              },
+              "<node-uuidi-val>": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "not_found",
+                      "in_progress",
+                      "success",
+                      "failed",
+                      "removed"
+                    ]
+                  }
+                }
+              }
+            },
         "required": [
           "status"
         ],
         "example": {
-          "status": "in_progress"
+          "97f922c5-9f04-4afa-92d6-65aa93fa58e7": {"status": "in_progress"},
+          "1df80389-7d6b-43dd-bff7-c6ed5de4efde": {"status": "failed"}
         }
       },
       "searchQuery": {
