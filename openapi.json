@@ -139,7 +139,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "lab%2F2fc3f792-cd71-45c7-a8dd-bd23f4639319%2FSun-Dog-Car-MIX_multiple_models"
+            "example": "lab/2fc3f792-cd71-45c7-a8dd-bd23f4639319/Sun-Dog-Car-MIX_multiple_models"
           },
           {
             "name": "model_id",
@@ -196,7 +196,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "lab%2F2fc3f792-cd71-45c7-a8dd-bd23f4639319%2FSun-Dog-Car-MIX_multiple_models"
+            "example": "lab/2fc3f792-cd71-45c7-a8dd-bd23f4639319/Sun-Dog-Car-MIX_multiple_models"
           },
           {
             "name": "node_id",
