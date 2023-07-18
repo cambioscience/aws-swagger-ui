@@ -91,12 +91,12 @@
         }
       }
     },
-    "/concept_tracks/v1/files/status": {
+    "/concept_tracks/v1/files/{file_id}/status": {
       "get": {
         "parameters": [
           {
             "name": "file_id",
-            "in": "query",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "string"
@@ -112,7 +112,7 @@
         "x-amazon-apigateway-integration": {
           "type": "aws_proxy",
           "httpMethod": "POST",
-          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-concept-tracks-concepttrackendpointslambda-y6iDgE074dpC/invocations",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-concept-tracks-concepttrackstatuslambdaB8F-6eywMtjkHcsX/invocations",
           "passthroughBehavior": "when_no_match"
         },
         "responses": {
@@ -129,21 +129,79 @@
         }
       }
     },
-    "/concept_tracks/v1/files/nodes": {
+    "/concept_tracks/v1/files/{file_id}/nodes": {
       "get": {
         "parameters": [
           {
             "name": "file_id",
-            "in": "query",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "example": "lab/2fc3f792-cd71-45c7-a8dd-bd23f4639319/Sun-Dog-Car-MIX_multiple_models"
+            "example": "lab%2F2fc3f792-cd71-45c7-a8dd-bd23f4639319%2FSun-Dog-Car-MIX_multiple_models"
+          },
+          {
+            "name": "model_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "522c5bce-ba13-432c-a429-6b4e99e14c81"
+          }
+        ],
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-concept-tracks-concepttracknodessuggestion-Szav0LwWyC0y/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conceptTracksNodeSuggestionsResponse"
+                },
+                "examples": {
+                  "node_suggestion_response": {
+                    "value": {
+                      "title": "sun dog",
+                      "id": "e4cc04f3-f5ed-49f1-be63-482204f14180",
+                      "pages": [
+                        0
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/concept_tracks/v1/files/{file_id}/nodes/{node_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "lab%2F2fc3f792-cd71-45c7-a8dd-bd23f4639319%2FSun-Dog-Car-MIX_multiple_models"
           },
           {
             "name": "node_id",
-            "in": "query",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             },
@@ -166,7 +224,7 @@
         "x-amazon-apigateway-integration": {
           "type": "aws_proxy",
           "httpMethod": "POST",
-          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-concept-tracks-concepttrackendpointslambda-y6iDgE074dpC/invocations",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-concept-tracks-concepttracknodesdetailslam-RJtYVfCrSm1V/invocations",
           "passthroughBehavior": "when_no_match"
         },
         "responses": {
@@ -175,34 +233,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/conceptTracksNodeSuggestionsResponse"
-                    },
-                    {
-                      "$ref": "#/components/schemas/conceptTracksNodeDetailsResponse"
-                    }
-                  ]
-                },
-                "examples": {
-                  "node_suggestion_response": {
-                    "value": {
-                      "title": "sun dog",
-                      "id": "e4cc04f3-f5ed-49f1-be63-482204f14180",
-                      "pages": [
-                        0
-                      ]
-                    }
-                  },
-                  "node_detail_response": {
-                    "value": {
-                      "title": "sun dog",
-                      "id": "e4cc04f3-f5ed-49f1-be63-482204f14180",
-                      "pages": [
-                        "..."
-                      ]
-                    }
-                  }
+                  "$ref": "#/components/schemas/conceptTracksNodeDetailsResponse"
                 }
               }
             }
