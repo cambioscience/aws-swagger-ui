@@ -365,15 +365,32 @@
                 "examples": {
                   "mcq_response": {
                     "value": {
-                      "question": "Which theory did Darwin discover?",
-                      "mcq_answers": [
-                        "Evolution.",
-                        "Evaluation.",
-                        "Optimization.",
-                        "Quantization."
+                      "questions": [
+                        "Which theory did Darwin discover?",
+                        "Which theory did Einstein discover?"
                       ],
-                      "correct_answer": "Evolution.",
-                      "explanation": "Darwin uncovered the theory of evolution."
+                      "mcq_answers": [
+                        [
+                          "Evolution.",
+                          "Evaluation.",
+                          "Optimization.",
+                          "Quantization."
+                        ],
+                        [
+                          "Relativity",
+                          "Relativism",
+                          "Relevantism",
+                          "Irrelevantism"
+                        ]
+                      ],
+                      "correct_answers": [
+                        "Evolution.",
+                        "Relativity"
+                      ],
+                      "explanations": [
+                        "Darwin uncovered the theory of evolution.",
+                        "Einstein discovered relativity, both special and general."
+                      ]
                     }
                   },
                   "non-mcq_response": {
@@ -409,44 +426,48 @@
   "components": {
     "schemas": {
       "searchIndexingStatusResponse": {
-          "properties": {
-              "<node-uuid1-val>": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "not_found",
-                      "in_progress",
-                      "success",
-                      "failed",
-                      "removed"
-                    ]
-                  }
-                }
-              },
-              "<node-uuidi-val>": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "not_found",
-                      "in_progress",
-                      "success",
-                      "failed",
-                      "removed"
-                    ]
-                  }
-                }
+        "properties": {
+          "<node-uuid1-val>": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "not_found",
+                  "in_progress",
+                  "success",
+                  "failed",
+                  "removed"
+                ]
               }
-            },
+            }
+          },
+          "<node-uuidi-val>": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "not_found",
+                  "in_progress",
+                  "success",
+                  "failed",
+                  "removed"
+                ]
+              }
+            }
+          }
+        },
         "required": [
           "status"
         ],
         "example": {
-          "97f922c5-9f04-4afa-92d6-65aa93fa58e7": {"status": "in_progress"},
-          "1df80389-7d6b-43dd-bff7-c6ed5de4efde": {"status": "failed"}
+          "97f922c5-9f04-4afa-92d6-65aa93fa58e7": {
+            "status": "in_progress"
+          },
+          "1df80389-7d6b-43dd-bff7-c6ed5de4efde": {
+            "status": "failed"
+          }
         }
       },
       "searchQuery": {
@@ -477,8 +498,14 @@
         "example": {
           "user": "a34516af-8888-0000-aa66-793428dcf3e4",
           "organization": "a5a946b7-2603-49a9-8f52-c730a7b56002",
-          "knowledge_spaces": ["d22206af-46f6-4482-bb06-793428dcf3e4", "b4288731-f301-4778-ac81-bd21ce84bdf5"],
-          "node_types": ["document", "video"],
+          "knowledge_spaces": [
+            "d22206af-46f6-4482-bb06-793428dcf3e4",
+            "b4288731-f301-4778-ac81-bd21ce84bdf5"
+          ],
+          "node_types": [
+            "document",
+            "video"
+          ],
           "query": "beef pieces"
         }
       },
@@ -555,28 +582,28 @@
           "exec_time": 3.69,
           "results": [
             {
-      "uuid": "be07f02e-3f60-4d9e-b080-7dc9005afbd5",
-      "node_uuid": "35d314c0-4542-4e72-939b-979ef07cb15f",
-      "node_kind": "document",
-      "space_uuid": "b4288731-f301-4778-ac81-bd21ce84bdf5",
-      "score": 0.8899998,
-      "original_text": "500g\t\r  of cheap beef pieces\t\r  (stewing\t\r  steak usually is cheap) ",
-      "title": "Cooking with Ingredients",
-      "start": null,
-      "end": null,
-      "page":3,
-      "coordinates": [
-        [
-          72.12010192871094,
-          652.975341796875,
-          404.9890594482422,
-          669.2617340087891
-        ]
-      ],
-      "href": null,
-      "match": "High"
-    }
-            ]
+              "uuid": "be07f02e-3f60-4d9e-b080-7dc9005afbd5",
+              "node_uuid": "35d314c0-4542-4e72-939b-979ef07cb15f",
+              "node_kind": "document",
+              "space_uuid": "b4288731-f301-4778-ac81-bd21ce84bdf5",
+              "score": 0.8899998,
+              "original_text": "500g\t\r  of cheap beef pieces\t\r  (stewing\t\r  steak usually is cheap) ",
+              "title": "Cooking with Ingredients",
+              "start": null,
+              "end": null,
+              "page": 3,
+              "coordinates": [
+                [
+                  72.12010192871094,
+                  652.975341796875,
+                  404.9890594482422,
+                  669.2617340087891
+                ]
+              ],
+              "href": null,
+              "match": "High"
+            }
+          ]
         }
       },
       "conceptTracksIndexingStatusResponse": {
@@ -786,38 +813,67 @@
       "questionGenerationResponseMCQs": {
         "type": "object",
         "properties": {
-          "question": {
-            "type": "string"
-          },
-          "mcq_answers": {
+          "questions": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "correct_answer": {
-            "type": "string"
+          "mcq_answers": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           },
-          "explanation": {
-            "type": "string"
+          "correct_answers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "explanations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
-          "question",
+          "questions",
           "mcq_answers",
-          "correct_answer",
-          "explanation"
+          "correct_answers",
+          "explanations"
         ],
         "example": {
-          "question": "Which theory did Darwin discover?",
-          "mcq_answers": [
-            "Evolution.",
-            "Evaluation.",
-            "Optimization.",
-            "Quantization."
+          "questions": [
+            "Which theory did Darwin discover?",
+            "Which theory did Einstein discover?"
           ],
-          "correct_answer": "Evolution.",
-          "explanation": "Darwin uncovered the theory of evolution."
+          "mcq_answers": [
+            [
+              "Evolution.",
+              "Evaluation.",
+              "Optimization.",
+              "Quantization."
+            ],
+            [
+              "Relativity",
+              "Relativism",
+              "Relevantism",
+              "Irrelevantism"
+            ]
+          ],
+          "correct_answers": [
+            "Evolution.",
+            "Relativity"
+          ],
+          "explanations": [
+            "Darwin uncovered the theory of evolution.",
+            "Einstein discovered relativity, both special and general."
+          ]
         }
       }
     },
