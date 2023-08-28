@@ -766,6 +766,9 @@
               "fill_in_blanks",
               "mcq"
             ]
+          },
+          "previous_question": {
+            "type": "string"
           }
         },
         "required": [
