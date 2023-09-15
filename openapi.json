@@ -493,6 +493,9 @@
           },
           "query": {
             "type": "string"
+          },
+          "page_number": {
+            "type": "integer"
           }
         },
         "example": {
@@ -506,7 +509,8 @@
             "document",
             "video"
           ],
-          "query": "beef pieces"
+          "query": "beef pieces",
+          "page_number": 1
         }
       },
       "searchResultsResponse": {
@@ -569,6 +573,12 @@
             "type": "number",
             "format": "float64"
           },
+          "has_node_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "results": {
             "type": "array",
             "items": {
@@ -580,6 +590,10 @@
           "query": "beef pieces",
           "num_results": 1,
           "exec_time": 3.69,
+          "has_node_types": [
+            "document",
+            "video"
+          ],
           "results": [
             {
               "uuid": "be07f02e-3f60-4d9e-b080-7dc9005afbd5",
