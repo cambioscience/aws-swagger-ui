@@ -91,6 +91,43 @@
         }
       }
     },
+    "/search/v1/search_and_summarize": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/searchQuery"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-IntelligentSearch-IntelligentSearchLambda6-xs6XNxu80s5s/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/searchSummarizeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/concept_tracks/v1/files/{file_id}/status": {
       "get": {
         "parameters": [
@@ -663,6 +700,48 @@
               "href": null,
               "match": "High"
             }
+          ]
+        }
+      },
+      "referencesResult": {
+        "type": "object",
+        "properties": {
+          "Reference number": {
+            "type": "string"
+          },
+          "Node uuid": {
+            "type": "string"
+          }
+        }
+      },
+      "searchSummarizeResponse": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
+          },
+          "returned_results": {
+            "type": "string"
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/referencesResult"
+            }
+          }
+        },
+        "example": {
+          "summary": "I am a summary of some results",
+          "returned_results": "These are some returned results",
+          "references": [
+            [
+              {
+                "Reference number": 1
+              },
+              {
+                "Node uuid": 1234
+              }
+            ]
           ]
         }
       },
