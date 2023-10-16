@@ -91,6 +91,43 @@
         }
       }
     },
+    "/search/v1/search_and_summarize": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/searchQuery"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-IntelligentSearch-IntelligentSearchLambda6-xs6XNxu80s5s/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/searchSummarizeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/concept_tracks/v1/files/{file_id}/status": {
       "get": {
         "parameters": [
@@ -414,6 +451,52 @@
         }
       }
     },
+    "/freeform_grader/v1": {
+      "post": {
+        "requestBody": {
+          "description": "Endpoint for grading freeform text answers to questions",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/freeformGraderQuery"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-freeform-demo-freeformgraderfunction86C87A-a4e4fl0K9QnD/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/freeformGraderResponse"
+                },
+                "examples": {
+                  "freeform_grader_response": {
+                    "value": {
+                      "score": 20,
+                      "explanation": "Student got the answer pretty wrong."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "x-amazon-apigateway-any-method": {
         "x-amazon-apigateway-integration": {
@@ -493,6 +576,9 @@
           },
           "query": {
             "type": "string"
+          },
+          "page_number": {
+            "type": "integer"
           }
         },
         "example": {
@@ -506,7 +592,8 @@
             "document",
             "video"
           ],
-          "query": "beef pieces"
+          "query": "beef pieces",
+          "page_number": 1
         }
       },
       "searchResultsResponse": {
@@ -569,6 +656,12 @@
             "type": "number",
             "format": "float64"
           },
+          "has_node_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "results": {
             "type": "array",
             "items": {
@@ -580,6 +673,10 @@
           "query": "beef pieces",
           "num_results": 1,
           "exec_time": 3.69,
+          "has_node_types": [
+            "document",
+            "video"
+          ],
           "results": [
             {
               "uuid": "be07f02e-3f60-4d9e-b080-7dc9005afbd5",
@@ -603,6 +700,48 @@
               "href": null,
               "match": "High"
             }
+          ]
+        }
+      },
+      "referencesResult": {
+        "type": "object",
+        "properties": {
+          "Reference number": {
+            "type": "string"
+          },
+          "Node uuid": {
+            "type": "string"
+          }
+        }
+      },
+      "searchSummarizeResponse": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
+          },
+          "returned_results": {
+            "type": "string"
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/referencesResult"
+            }
+          }
+        },
+        "example": {
+          "summary": "I am a summary of some results",
+          "returned_results": "These are some returned results",
+          "references": [
+            [
+              {
+                "Reference number": 1
+              },
+              {
+                "Node uuid": 1234
+              }
+            ]
           ]
         }
       },
@@ -877,6 +1016,49 @@
             "Darwin uncovered the theory of evolution.",
             "Einstein discovered relativity, both special and general."
           ]
+        }
+      },
+      "freeformGraderQuery": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "student_answer": {
+            "type": "string"
+          },
+          "model_answer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "student_answer",
+          "model_answer"
+        ],
+        "example": {
+          "question": "What is a cryptocurrency?",
+          "student_answer": "Cryptocurrency is a physical coin minted by governments, based on the gold standard, which needs a centralized bank for all transactions and validations.",
+          "model_answer": "Cryptocurrency is a digital or virtual currency that uses cryptography for security and operates on a decentralized platform, typically based on blockchain technology."
+        }
+      },
+      "freeformGraderResponse": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "integer"
+          },
+          "explanation": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "score",
+          "explanation"
+        ],
+        "example": {
+          "score": 80,
+          "explanation": "student got the answer roughly right."
         }
       }
     },
