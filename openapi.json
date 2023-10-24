@@ -322,6 +322,44 @@
         }
       }
     },
+    "/dcs/v1/suggestions": {
+      "get": {
+        "parameters": [
+          {
+            "name": "space_uuid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d22206af-46f6-4482-bb06-793428dcf3e4"
+          }
+        ],
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-DCSCdkStack-SuggestionsEndpointLambdaA39B8-iVeVBlyoptSJ/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dcsSuggestionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/pdf_2_text/v1/files/{file_id}/status": {
       "get": {
         "parameters": [
@@ -871,6 +909,49 @@
         ],
         "example": {
           "status": "in_progress"
+        }
+      },
+      "dcsSuggestionsResponse": {
+        "type": "object",
+        "properties": {
+          "space_uuid": {
+            "type": "string"
+          },
+          "last_refreshed_at": {
+            "type": "string"
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "suggested_node_uuid": {
+                  "type": "string"
+                },
+                "score": {
+                  "type": "number"
+                },
+                "from_space_uuid": {
+                  "type": "string"
+                },
+                "last_updated_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "space_uuid": "d22206af-46f6-4482-bb06-793428dcf3e4",
+          "last_refreshed_at": "October 24, 2023, 03:16 PM",
+          "suggestions": [
+            {
+              "suggested_node_uuid": "cd2206af-46f6-4482-bb06-793428dcf3e4",
+              "score": 1,
+              "from_space_uuid": "ab2206af-46f6-4482-bb06-793428dcf3e4",
+              "last_updated_at": "October 24, 2023, 03:16 PM"
+            }
+          ]
         }
       },
       "pdf2TextIndexingStatusResponse": {
