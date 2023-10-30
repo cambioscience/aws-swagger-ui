@@ -535,6 +535,61 @@
         }
       }
     },
+    "/search_analytics/v1": {
+      "post": {
+        "requestBody": {
+          "description": "Endpoint for getting data on recent searches by users",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/searchAnalyticsQuery"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-freeform-demo-freeformgraderfunction86C87A-a4e4fl0K9QnD/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/searchAnalyticsResponse"
+                },
+                "examples": {
+                  "search_analytics_response": {
+                    "value": {
+                      "total_search_volume": 27,
+                      "top_ten_searches": [
+                        {
+                          "search_query": "what is maths",
+                          "count": 4
+                        },
+                        {
+                          "search_query": "how to multiply",
+                          "count": 2
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "x-amazon-apigateway-any-method": {
         "x-amazon-apigateway-integration": {
@@ -1140,6 +1195,83 @@
         "example": {
           "score": 80,
           "explanation": "student got the answer roughly right."
+        }
+      },
+      "searchAnalyticsQuery": {
+        "type": "object",
+        "properties": {
+          "user_ids": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "date_range": {
+            "type": "object",
+            "properties": {
+              "start_date": {
+                "type": "string"
+              },
+              "end_date": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "user_ids",
+          "date_range"
+        ],
+        "example": {
+          "user_ids": [
+            "abc123",
+            "def456"
+          ],
+          "date_range": {
+            "start_date": "01-01-1970",
+            "end_date": "10-31-2023"
+          }
+        }
+      },
+      "searchAnalyticsResponse": {
+        "type": "object",
+        "properties": {
+          "total_search_volume": {
+            "type": "integer"
+          },
+          "top_ten_searches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "search_query": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "total_search_volume",
+          "top_ten_searches"
+        ],
+        "example": {
+          "total_search_volume": 27,
+          "top_ten_searches": [
+            {
+              "search_query": "what is maths",
+              "count": 4
+            },
+            {
+              "search_query": "how to multiply",
+              "count": 2
+            }
+          ]
         }
       }
     },
