@@ -535,7 +535,7 @@
         }
       }
     },
-    "/search_analytics/v1": {
+    "/search_analytics/v1/search_analytics": {
       "post": {
         "requestBody": {
           "description": "Endpoint for getting data on recent searches by users",
@@ -1200,6 +1200,9 @@
       "searchAnalyticsQuery": {
         "type": "object",
         "properties": {
+          "org_id": {
+            "type": "string"
+          },
           "user_ids": {
             "items": {
               "type": "array",
@@ -1208,16 +1211,11 @@
               }
             }
           },
-          "date_range": {
-            "type": "object",
-            "properties": {
-              "start_date": {
-                "type": "string"
-              },
-              "end_date": {
-                "type": "string"
-              }
-            }
+          "start_date": {
+            "type": "string"
+          },
+          "end_date": {
+            "type": "string"
           }
         },
         "required": [
@@ -1225,14 +1223,13 @@
           "date_range"
         ],
         "example": {
+          "org_id": "dfcf38ab-b18f-4825-9631-af2a06ba4d07",
           "user_ids": [
-            "abc123",
-            "def456"
+            "f6a16ff7-4a31-11eb-be7b-8344edc8f36b",
+            "fa35b027-20d5-41d1-b524-87d249aa6966 "
           ],
-          "date_range": {
-            "start_date": "01-01-1970",
-            "end_date": "10-31-2023"
-          }
+          "start_date": "03-31-2023",
+          "end_date": "04-30-2023"
         }
       },
       "searchAnalyticsResponse": {
