@@ -1258,7 +1258,11 @@
           "top_ten_searches"
         ],
         "example": {
-          "total_search_volume": 27,
+          "total_search_volume": [
+            27,
+            14,
+            73
+          ],
           "top_ten_searches": [
             {
               "search_query": "what is maths",
