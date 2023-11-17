@@ -1223,20 +1223,30 @@
           "date_range"
         ],
         "example": {
-          "org_id": "dfcf38ab-b18f-4825-9631-af2a06ba4d07",
+          "org_id": "7c646fda-809f-424b-8a45-66fbbb30e904",
           "user_ids": [
-            "f6a16ff7-4a31-11eb-be7b-8344edc8f36b",
-            "fa35b027-20d5-41d1-b524-87d249aa6966 "
+            "1c92462f-37fa-4114-8698-d1b11a661dcd"
           ],
-          "start_date": "03-31-2023",
-          "end_date": "04-30-2023"
+          "start_date": "10-10-2023",
+          "end_date": "10-17-2023"
         }
       },
       "searchAnalyticsResponse": {
         "type": "object",
         "properties": {
           "total_search_volume": {
-            "type": "integer"
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              }
+            }
           },
           "top_ten_searches": {
             "type": "array",
@@ -1259,18 +1269,19 @@
         ],
         "example": {
           "total_search_volume": [
-            27,
-            14,
-            73
+            {
+              "date": "10-10-2023",
+              "count": 22
+            },
+            {
+              "date": "10-11-2023",
+              "count": 4
+            }
           ],
           "top_ten_searches": [
             {
-              "search_query": "what is maths",
-              "count": 4
-            },
-            {
-              "search_query": "how to multiply",
-              "count": 2
+              "search_query": "GDPR",
+              "count": 26
             }
           ]
         }
