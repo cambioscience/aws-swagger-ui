@@ -559,28 +559,43 @@
           "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-freeform-demo-freeformgraderfunction86C87A-a4e4fl0K9QnD/invocations",
           "passthroughBehavior": "when_no_match"
         },
+        "summary": "Retrieve search analytics data",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "A map of search analytics data keyed by UUID",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/searchAnalyticsResponse"
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/SearchAnalyticsData"
+                  }
                 },
                 "examples": {
-                  "search_analytics_response": {
+                  "example1": {
                     "value": {
-                      "total_search_volume": 27,
-                      "top_ten_searches": [
-                        {
-                          "search_query": "what is maths",
-                          "count": 4
-                        },
-                        {
-                          "search_query": "how to multiply",
-                          "count": 2
-                        }
-                      ]
+                      "d0e74493-9d63-4de1-9deb-d8bba62a43c9": {
+                        "query_volume_counts": [
+                          {
+                            "date": "10-26-2023",
+                            "counts": 6
+                          }
+                        ],
+                        "top_ten_queries": [
+                          {
+                            "query": "Structural ",
+                            "count": 3
+                          },
+                          {
+                            "query": "means hearing",
+                            "count": 2
+                          },
+                          {
+                            "query": "means",
+                            "count": 1
+                          }
+                        ]
+                      }
                     }
                   }
                 }
@@ -1231,60 +1246,57 @@
           "end_date": "10-17-2023"
         }
       },
-      "searchAnalyticsResponse": {
+      "SearchAnalyticsData": {
         "type": "object",
         "properties": {
-          "total_search_volume": {
+          "query_volume_counts": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "date": {
-                  "type": "string"
-                },
-                "count": {
-                  "type": "integer"
-                }
-              }
+              "$ref": "#/components/schemas/QueryVolumeCount"
             }
           },
-          "top_ten_searches": {
+          "top_ten_queries": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "search_query": {
-                  "type": "string"
-                },
-                "count": {
-                  "type": "integer"
-                }
-              }
+              "$ref": "#/components/schemas/TopQuery"
             }
           }
         },
         "required": [
-          "total_search_volume",
-          "top_ten_searches"
-        ],
-        "example": {
-          "total_search_volume": [
-            {
-              "date": "10-10-2023",
-              "count": 22
-            },
-            {
-              "date": "10-11-2023",
-              "count": 4
-            }
-          ],
-          "top_ten_searches": [
-            {
-              "search_query": "GDPR",
-              "count": 26
-            }
-          ]
-        }
+          "query_volume_counts",
+          "top_ten_queries"
+        ]
+      },
+      "QueryVolumeCount": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "mm-dd-yyyy"
+          },
+          "counts": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "counts"
+        ]
+      },
+      "TopQuery": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query",
+          "count"
+        ]
       }
     },
     "securitySchemes": {
