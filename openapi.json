@@ -398,6 +398,40 @@
         }
       }
     },
+    "/pdf_2_text/v1/files/bulk_status": {
+      "post": {
+        "summary": "Check the status of multiple PDF to text conversion jobs",
+        "description": "This endpoint allows you to check the status of multiple file conversion jobs by providing their file IDs.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pdf2TextBulkIndexingStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the status of the files",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pdf2TextBulkIndexingStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/question_generation/v1": {
       "post": {
         "requestBody": {
@@ -1041,6 +1075,40 @@
         ],
         "example": {
           "status": "in_progress"
+        }
+      },
+      "pdf2TextBulkIndexingStatusRequest": {
+        "type": "object",
+        "properties": {
+          "file_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "file_ids": [
+            "lab/0b37cc06-e72f-40e3-a5db-a0861142b134/Electric fields",
+            "msg-sum23/c2e7082f-40d3-484d-9e1c-f25d4d5534f1/Speech_audio_quality_test-o8dEgTMZ81g-2min-__*!_____.mp3.transcript"
+          ]
+        }
+      },
+      "pdf2TextBulkIndexingStatusResponse": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "result": {
+            "file_id_1": "completed",
+            "file_id_2": "in_progress"
+          }
         }
       },
       "questionGenerationQuery": {
