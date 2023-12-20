@@ -412,6 +412,17 @@
             }
           }
         },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-pdf-2-text-pdf2textstatusbulklambda4E4CC65-9gL4dUbyZbE2/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
         "responses": {
           "200": {
             "description": "Successfully retrieved the status of the files",
