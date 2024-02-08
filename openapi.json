@@ -446,7 +446,7 @@
     "/question_generation/v1": {
       "post": {
         "requestBody": {
-          "description": "Endpoint for the question generation service",
+          "description": "Endpoint for the openai based question generation service",
           "required": true,
           "content": {
             "application/json": {
@@ -465,6 +465,97 @@
           "type": "aws_proxy",
           "httpMethod": "POST",
           "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-QGCdkStack-QuestionGenerationLambdaB5F6D33-ASsGg7bsslnl/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/questionGenerationResponseMultipleQuestions"
+                    },
+                    {
+                      "$ref": "#/components/schemas/questionGenerationResponseMCQs"
+                    }
+                  ]
+                },
+                "examples": {
+                  "mcq_response": {
+                    "value": {
+                      "questions": [
+                        "Which theory did Darwin discover?",
+                        "Which theory did Einstein discover?"
+                      ],
+                      "mcq_answers": [
+                        [
+                          "Evolution.",
+                          "Evaluation.",
+                          "Optimization.",
+                          "Quantization."
+                        ],
+                        [
+                          "Relativity",
+                          "Relativism",
+                          "Relevantism",
+                          "Irrelevantism"
+                        ]
+                      ],
+                      "correct_answers": [
+                        "Evolution.",
+                        "Relativity"
+                      ],
+                      "explanations": [
+                        "Darwin uncovered the theory of evolution.",
+                        "Einstein discovered relativity, both special and general."
+                      ]
+                    }
+                  },
+                  "non-mcq_response": {
+                    "value": {
+                      "questions": [
+                        "What is a corpus?",
+                        "How the corpus should be constructed?",
+                        "What data is used to build the corpus?"
+                      ],
+                      "answers": [
+                        "A corpus is a collection of linguistic data.",
+                        "It should be constructed so as to be balanced and representative.",
+                        "Linguistic data which was not originally produced for the process of linguistic analysis."
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/question_generation/v2": {
+      "post": {
+        "requestBody": {
+          "description": "Endpoint for the claude based question generation service",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/questionGenerationQuery"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-QGCdkStack-AnthropicQuestionGenerationLamb-R4hwRcLx6wKo/invocations",
           "passthroughBehavior": "when_no_match"
         },
         "responses": {
