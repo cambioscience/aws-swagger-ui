@@ -741,6 +741,44 @@
         }
       }
     },
+    "/node_summarizer/v1/summary": {
+      "get": {
+        "parameters": [
+          {
+            "name": "node_uuid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "760c23a4-f84f-442e-ac13-03e72938c9db"
+          }
+        ],
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-SummarizerCdkStac-LBSummarizerEndpointLamb-W9XQDu0kG6Xq/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "x-amazon-apigateway-any-method": {
         "x-amazon-apigateway-integration": {
@@ -1467,6 +1505,21 @@
           "query",
           "count"
         ]
+      },
+      "NodeSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "node_uuid": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "node_uuid": "3271f11a-1ea5-4f9e-a286-44efab57b4af",
+          "summary": "The document discusses the composition of the Sun. Key points:\n\n1. The Sun is composed primarily of hydrogen (74.9%) and helium (23.8%). Heavier elements (\"metals\") make up less than 2%. \n\n2. The hydrogen and helium were produced in the first 20 minutes after the Big Bang. Heavier elements were produced by previous generations of stars and spread through supernovae explosions.\n\n3. Originally the Sun had 71.1% hydrogen, 27.4% helium, 1.5% heavier elements. Gravity caused heavier elements to settle towards the core over time.\n\n4. In the core, hydrogen fused into helium over billions of years. The core now has ~60% helium. An inner helium core is starting to form.\n\n5. In 5 billion years helium buildup will cause the Sun to become a red giant when it exits the main sequence.\n\n6. The composition of the Sun's photosphere is considered representative of the primordial solar system composition. It's measured by spectroscopy of the photosphere and meteorites.\n"
+        }
       }
     },
     "securitySchemes": {
