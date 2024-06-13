@@ -14,6 +14,18 @@
           "default": "dev"
         }
       }
+    },
+    {
+      "url": "https://{lambda-url-id}.lambda-url.{region}.on.aws",
+      "description": "AWS Lambda Function URL",
+      "variables": {
+        "lambda-url-id": {
+          "default": "your-lambda-url-id"
+        },
+        "region": {
+          "default": "eu-west-1"
+        }
+      }
     }
   ],
   "paths": {
@@ -780,10 +792,29 @@
       }
     },
     "/": {
-      "x-amazon-apigateway-any-method": {
-        "x-amazon-apigateway-integration": {
-          "type": "mock",
-          "passthroughBehavior": "when_no_match"
+        "post": {
+          "requestBody": {
+          "description": "Streaming search summarizer lambda function url",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/searchQuery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/searchSummarizeResponse"
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -1531,3 +1562,4 @@
     }
   }
 }
+  
