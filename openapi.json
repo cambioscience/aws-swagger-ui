@@ -793,6 +793,17 @@
     },
     "/": {
         "post": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "headers",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "jwt token for authentication"
+            }
+          ],
           "requestBody": {
           "description": "Streaming search summarizer lambda function url",
           "required": true,
@@ -810,7 +821,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/searchSummarizeResponse"
+                  "$ref": "#/components/schemas/streamingSearchSummarizeResponse"
                 }
               }
             }
@@ -1057,6 +1068,21 @@
             ]
           ]
         }
+      },
+      "streamingSearchSummarizeResponse": {
+        "type": "object",
+        "properties": {
+          "v2_results": {
+            "type": "json",
+            "items": {
+              "$ref": "#/components/schemas/searchResponse"
+            }
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "example": "{\"v2_results\": {\"user\": \"a34516af-8888-0000-aa66-793428dcf3e4\", \"organization\": \"a5a946b7-2603-49a9-8f52-c730a7b56002\", \"knowledge_spaces\": [\"d22206af-46f6-4482-bb06-793428dcf3e4\", \"b4288731-f301-4778-ac81-bd21ce84bdf5\"], \"node_types\": [\"document\", \"video\"], \"query\": \"beef pieces\", \"page_number\": 1}}\nI am a summary of some results"
       },
       "conceptTracksIndexingStatusResponse": {
         "type": "object",
