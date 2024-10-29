@@ -372,6 +372,43 @@
         }
       }
     },
+    "/dcs/v1/indexing-status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "node-uuids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-IntelligentSearch-IndexingStatusQueryingLa-smEFC4cQ1fgJ/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/searchIndexingStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/pdf_2_text/v1/files/{file_id}/status": {
       "get": {
         "parameters": [
@@ -862,19 +899,19 @@
       }
     },
     "/": {
-        "post": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "in": "headers",
-              "required": true,
-              "schema": {
-                "type": "string"
-              },
-              "description": "jwt token for authentication"
-            }
-          ],
-          "requestBody": {
+      "post": {
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "headers",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "jwt token for authentication"
+          }
+        ],
+        "requestBody": {
           "description": "Streaming search summarizer lambda function url",
           "required": true,
           "content": {
