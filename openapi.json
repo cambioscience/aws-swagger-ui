@@ -420,7 +420,7 @@
         }
       }
     },
-    "/concept_tracks/v3/text_location": {
+    "/concept_tracks/v3/text-location": {
       "post":{
         "summary": "Send concept-tracks requests for processing",
         "description": "This API receives the text location and send it to concept tracks processing SQS, it returns a request_uuid which can be used to query the status and results",
