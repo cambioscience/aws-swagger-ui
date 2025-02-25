@@ -20,7 +20,7 @@
       "description": "AWS Lambda Function URL",
       "variables": {
         "lambda-url-id": {
-          "default": "your-lambda-url-id"
+          "default": "your-actual-lambda-url-id"
         },
         "region": {
           "default": "eu-west-1"
@@ -31,6 +31,8 @@
   "paths": {
     "/search/v1/indexing-status": {
       "get": {
+        "summary": "Gives indexing status for nodes in search",
+        "description": "Retrieves the indexing status of nodes by node_id in search.",
         "parameters": [
           {
             "name": "node-uuids",
@@ -68,6 +70,8 @@
     },
     "/search/v1/search": {
       "post": {
+        "summary": "Performs a search.",
+        "description": "Retrieves results for a particular search query in a space and/or org",
         "requestBody": {
           "required": true,
           "content": {
@@ -105,6 +109,8 @@
     },
     "/search/v1/search_and_summarize": {
       "post": {
+        "summary": "Performs a RAG search",
+        "description": "Retrieves search results for a given query and summarizes the results in the context of the question.",
         "requestBody": {
           "required": true,
           "content": {
@@ -140,8 +146,10 @@
         }
       }
     },
-    "/concept_tracks/v1/files/{file_id}/status": {
+    "/concept_tracks/v2/files/{file_id}/status": {
       "get": {
+        "summary": "Get content processing status for concept track",
+        "description": "Retrieves processing status for content submitted to concept track.",
         "parameters": [
           {
             "name": "file_id",
@@ -178,8 +186,10 @@
         }
       }
     },
-    "/concept_tracks/v1/files/{file_id}/nodes": {
+    "/concept_tracks/v2/files/{file_id}/nodes": {
       "get": {
+        "summary": "Get Node Suggestions for content",
+        "description": "Retrieves node suggestions for a given file ID.",
         "parameters": [
           {
             "name": "file_id",
@@ -235,8 +245,10 @@
         }
       }
     },
-    "/concept_tracks/v1/files/{file_id}/nodes/{node_id}": {
+    "/concept_tracks/v2/files/{file_id}/nodes/{node_id}": {
       "get": {
+        "summary": "Get details suggested nodes in concept track",
+        "description": "Retrieves node details for a given node suggested from a piece of content.",
         "parameters": [
           {
             "name": "file_id",
@@ -290,8 +302,10 @@
         }
       }
     },
-    "/concept_tracks/v1/models": {
+    "/concept_tracks/v2/models": {
       "get": {
+        "summary": "Get models used in concept track",
+        "description": "Retrieves the uuids and names of different concept track models being used.",
         "security": [
           {
             "api_key": []
@@ -334,8 +348,250 @@
         }
       }
     },
+    "/concept_tracks/v2/videos/{file_id}/details": {
+      "get": {
+        "summary": "Get detailed concept track info for video",
+        "description": "Retrieves details about the concepts found in a given video file.",
+        "operationId": "getNodeSuggestionsForVideo",
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "lab/97ccfdf3-acad-4ad6-972c-f611dac610e5/2014-simon-sinek-005-1ee224d1-c412-40c4-9e80-5000k.mp4.transcript",
+            "description": "File identifier consisting of {org_short_name}/{space_id}/{file_name}.mp4.transcript."
+          }
+        ],
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-concept-tracks-concepttrackvideodetailslam-7SOK6tzIRRz5/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetVideoNodeSuggestionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoNodeErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoNodeErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoNodeErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/concept_tracks/v3/text_location": {
+      "post":{
+        "summary": "Send concept-tracks requests for processing",
+        "description": "This API receives the text location and send it to concept tracks processing SQS, it returns a request_uuid which can be used to query the status and results",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/conceptTracksV3TextLocationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conceptTracksV3TextLocationResponse"
+                }
+              }
+            }
+          }
+        }
+        }
+    },
+    "/concept_tracks/v3/bulk_status": {
+      "get": {
+        "summary": "Check the status of one or more requests",
+        "description": "This API accepts a query parameter `request_ids` the value of it is one request or multiple requests separated by a comma ','",
+        "parameters": [
+          {
+            "name": "request_ids",
+            "in": "query",
+            "description": "A single request UUID or multiple UUIDs separated by commas (e.g., 'uuid1' or 'uuid1,uuid2,uuid3')",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "123e4567-e89b-12d3-a456-426614174000,987fcdeb-12ab-34cd-e567-8f9g1011h12i"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with request statuses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "enum": ["completed", "failed", "in_progress", "not_found"],
+                    "description": "The status of the request"
+                  },
+                  "example": {
+                    "123e4567-e89b-12d3-a456-426614174000": "completed",
+                    "987fcdeb-12ab-34cd-e567-8f9g1011h12i": "failed",
+                    "550e8400-e29b-41d4-a716-446655440000": "in_progress",
+                    "6ba7b810-9dad-11d1-80b4-00c04fd430c8": "not_found"
+                  }
+                }
+              }
+            }
+          }
+        }
+
+      }
+    },
+    "concept_tracks/v3/{request_id}/node_suggestion": {
+      "get": {
+        "summary": "Retrieve node suggestions for a request",
+        "description": "Fetches a list of nodes generated from the text associated with the specified request ID. Each node represents a concept or entity identified in the text, including its title, unique ID, and metadata about its position in the original text.",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "description": "The UUID received from the initial text submission. This identifies the request for which node suggestions are being retrieved.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with a list of node suggestions generated from the analyzed text.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conceptTracksV3NodeSuggestionsResponse"
+                }
+              }
+            }
+            
+          },
+          "404": {
+            "description": "Not found - No nodes exist for the specified request ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/notFoundErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "concept_tracks/v3/{request_id}/node_details/{node_id}": {
+      "get": {
+        "summary": "Retrieve node details for a request and a node",
+        "description": "Fetches the details of a node specified by request_id and node_id",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "description": "The UUID received from the initial text submission. This identifies the request for which node suggestions are being retrieved.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          },
+          {
+            "name": "node_id",
+            "in": "path",
+            "description": "The UUID received from nodes suggestion. This identifies the node for which node details are being retrieved.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+              "example": "345e4567-e89b-12d3-a456-426614174000"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with details of the node.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conceptTracksV3NodeDetailsResponse"
+                }
+              }
+            }
+            
+          },
+          "404": {
+            "description": "Not found - No nodes exist for the specified request ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/notFoundErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/dcs/v1/suggestions": {
       "get": {
+        "summary": "Get space enrichment suggestions from DCS",
+        "description": "Retrieves ordered list of nodes suitable for incorporation into a space from the DCS.",
         "parameters": [
           {
             "name": "space_uuid",
@@ -374,6 +630,8 @@
     },
     "/dcs/v1/indexing-status": {
       "get": {
+        "summary": "Get DCS indexing status for node",
+        "description": "Retrieves indexing status in DCS for a given batch of node ids.",
         "parameters": [
           {
             "name": "node-uuids",
@@ -411,6 +669,8 @@
     },
     "/pdf_2_text/v1/files/{file_id}/status": {
       "get": {
+        "summary": "Get pdf-2-text indexing status",
+        "description": "Retrieves processing status of a file in pdf-2-text.",
         "parameters": [
           {
             "name": "file_id",
@@ -492,101 +752,11 @@
         }
       }
     },
-    "/question_generation/v1": {
-      "post": {
-        "requestBody": {
-          "description": "Endpoint for the openai based question generation service",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/questionGenerationQuery"
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "api_key": []
-          }
-        ],
-        "x-amazon-apigateway-integration": {
-          "type": "aws_proxy",
-          "httpMethod": "POST",
-          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-QGCdkStack-QuestionGenerationLambdaB5F6D33-ASsGg7bsslnl/invocations",
-          "passthroughBehavior": "when_no_match"
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/questionGenerationResponseMultipleQuestions"
-                    },
-                    {
-                      "$ref": "#/components/schemas/questionGenerationResponseMCQs"
-                    }
-                  ]
-                },
-                "examples": {
-                  "mcq_response": {
-                    "value": {
-                      "questions": [
-                        "Which theory did Darwin discover?",
-                        "Which theory did Einstein discover?"
-                      ],
-                      "mcq_answers": [
-                        [
-                          "Evolution.",
-                          "Evaluation.",
-                          "Optimization.",
-                          "Quantization."
-                        ],
-                        [
-                          "Relativity",
-                          "Relativism",
-                          "Relevantism",
-                          "Irrelevantism"
-                        ]
-                      ],
-                      "correct_answers": [
-                        "Evolution.",
-                        "Relativity"
-                      ],
-                      "explanations": [
-                        "Darwin uncovered the theory of evolution.",
-                        "Einstein discovered relativity, both special and general."
-                      ]
-                    }
-                  },
-                  "non-mcq_response": {
-                    "value": {
-                      "questions": [
-                        "What is a corpus?",
-                        "How the corpus should be constructed?",
-                        "What data is used to build the corpus?"
-                      ],
-                      "answers": [
-                        "A corpus is a collection of linguistic data.",
-                        "It should be constructed so as to be balanced and representative.",
-                        "Linguistic data which was not originally produced for the process of linguistic analysis."
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/question_generation/v2": {
       "post": {
+        "summary": "Get suggested questions for content (Claude)",
+        "description": "Retrieves suggested questions for a given node of content.",
         "requestBody": {
-          "description": "Endpoint for the claude based question generation service",
           "required": true,
           "content": {
             "application/json": {
@@ -657,7 +827,7 @@
                     "value": {
                       "questions": [
                         "What is a corpus?",
-                        "How the corpus should be constructed?",
+                        "How should the corpus be constructed?",
                         "What data is used to build the corpus?"
                       ],
                       "answers": [
@@ -674,15 +844,16 @@
         }
       }
     },
-    "/freeform_grader/v1": {
+    "/question_generation/v3": {
       "post": {
+        "summary": "Get multilingual suggested questions for content (Claude Sonnet 3)",
+        "description": "Retrieves suggested questions for a given node of content.",
         "requestBody": {
-          "description": "Endpoint for grading freeform text answers to questions",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/freeformGraderQuery"
+                "$ref": "#/components/schemas/questionGenerationQueryV3"
               }
             }
           }
@@ -695,7 +866,7 @@
         "x-amazon-apigateway-integration": {
           "type": "aws_proxy",
           "httpMethod": "POST",
-          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-freeform-demo-freeformgraderfunction86C87A-a4e4fl0K9QnD/invocations",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-QGCdkStack-Claude3QuestionGenerationLambda-CzSzjdheSxdq/invocations",
           "passthroughBehavior": "when_no_match"
         },
         "responses": {
@@ -704,10 +875,102 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/freeformGraderResponse"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/questionGenerationResponseMultipleQuestions"
+                    },
+                    {
+                      "$ref": "#/components/schemas/questionGenerationResponseMCQs"
+                    }
+                  ]
                 },
                 "examples": {
-                  "freeform_grader_response": {
+                  "mcq_response": {
+                    "value": {
+                      "questions": [
+                        "Which theory did Darwin discover?",
+                        "Which theory did Einstein discover?"
+                      ],
+                      "mcq_answers": [
+                        [
+                          "Evolution.",
+                          "Evaluation.",
+                          "Optimization.",
+                          "Quantization."
+                        ],
+                        [
+                          "Relativity",
+                          "Relativism",
+                          "Relevantism",
+                          "Irrelevantism"
+                        ]
+                      ],
+                      "correct_answers": [
+                        "Evolution.",
+                        "Relativity"
+                      ],
+                      "explanations": [
+                        "Darwin uncovered the theory of evolution.",
+                        "Einstein discovered relativity, both special and general."
+                      ]
+                    }
+                  },
+                  "non-mcq_response": {
+                    "value": {
+                      "questions": [
+                        "What is a corpus?",
+                        "How should the corpus be constructed?",
+                        "What data is used to build the corpus?"
+                      ],
+                      "answers": [
+                        "A corpus is a collection of linguistic data.",
+                        "It should be constructed so as to be balanced and representative.",
+                        "Linguistic data which was not originally produced for the process of linguistic analysis.                        "
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/open_questions/v1": {
+      "post": {
+        "summary": "Endpoint for grading open text answers to questions",
+        "description": "Grades student answers against a model answer to give a score and an explanation of the score.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/openQuestionsGraderQuery"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-FreeformDemoCdkSt-freeformappfunctionC61B1-D9zkjx5FflRV/invocations",
+          "passthroughBehavior": "when_no_match"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/openQuestionsGraderResponse"
+                },
+                "examples": {
+                  "open_questions_grader_response": {
                     "value": {
                       "score": 20,
                       "explanation": "Student got the answer pretty wrong."
@@ -722,8 +985,9 @@
     },
     "/search_analytics/v1/search_analytics": {
       "post": {
+        "summary": "Endpoint for getting data on recent searches by users",
+        "description": "Returns detailed data on user searches in a space over time.",
         "requestBody": {
-          "description": "Endpoint for getting data on recent searches by users",
           "required": true,
           "content": {
             "application/json": {
@@ -744,7 +1008,6 @@
           "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-SearchAnalyticsCd-SearchAnalyticsLambda8B5-bUSIbBqKFXLa/invocations",
           "passthroughBehavior": "when_no_match"
         },
-        "summary": "Retrieve search analytics data",
         "responses": {
           "200": {
             "description": "A map of search analytics data keyed by UUID",
@@ -792,8 +1055,9 @@
     },
     "/search_analytics/v2/search_analytics": {
       "post": {
+        "summary": "Endpoint for getting data on recent searches by users",
+        "description": "Returns detailed data on user searches in a space over time.",
         "requestBody": {
-          "description": "Endpoint for getting data on recent searches by users",
           "required": true,
           "content": {
             "application/json": {
@@ -814,7 +1078,6 @@
           "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-SearchAnalyticsCd-SearchAnalyticsByOrgLamb-dNjD3wDhcxqO/invocations",
           "passthroughBehavior": "when_no_match"
         },
-        "summary": "Retrieve search analytics data",
         "responses": {
           "200": {
             "description": "A map of search analytics data keyed by UUID",
@@ -862,6 +1125,8 @@
     },
     "/node_summarizer/v1/summary": {
       "get": {
+        "summary": "Endpoint for summarizing node content",
+        "description": "Returns summary of the content in a node.",
         "parameters": [
           {
             "name": "node_uuid",
@@ -900,19 +1165,21 @@
     },
     "/": {
       "post": {
+        "summary": "Endpoint for streaming RAG search",
+        "description": "Returns packet by packet response from RAG search.",
         "parameters": [
           {
             "name": "Authorization",
-            "in": "headers",
+            "in": "header",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "jwt token for authentication"
+            "description": "JWT token for authentication"
           }
         ],
         "requestBody": {
-          "description": "Streaming search summarizer lambda function url",
+          "description": "Streaming search summarizer lambda function URL",
           "required": true,
           "content": {
             "application/json": {
@@ -935,46 +1202,1186 @@
           }
         }
       }
-    }
-  },
-  "components": {
-    "schemas": {
-      "searchIndexingStatusResponse": {
-        "properties": {
-          "<node-uuid1-val>": {
-            "type": "object",
-            "properties": {
-              "status": {
-                "type": "string",
-                "enum": [
-                  "not_found",
-                  "in_progress",
-                  "success",
-                  "failed",
-                  "removed"
-                ]
-              }
-            }
-          },
-          "<node-uuidi-val>": {
-            "type": "object",
-            "properties": {
-              "status": {
-                "type": "string",
-                "enum": [
-                  "not_found",
-                  "in_progress",
-                  "success",
-                  "failed",
-                  "removed"
-                ]
+    },
+    "/suggest_nodes/v1/suggest_nodes": {
+      "post": {
+        "summary": "Get suggested next nodes (Blackbird)",
+        "description": "Endpoint to get suggestions for the next nodes based on the current state.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlackbirdNextNodeRequest"
+              },
+              "examples": {
+                "BlackbirdNextNodeRequestExample": {
+                  "value": {
+                    "num_concepts": 3,
+                    "specificity_ordering": [
+                      "concept1",
+                      "concept3",
+                      "concept2"
+                    ],
+                    "space_node_details": [
+                      {
+                        "node_id": "123e4567-e89b-12d3-a456-426614174000",
+                        "node_kind": "document",
+                        "specificity": [
+                          0.7,
+                          0.8,
+                          0.9
+                        ]
+                      },
+                      {
+                        "node_id": "123e4567-e89b-12d3-a456-426614174001",
+                        "node_kind": "video",
+                        "specificity": [
+                          0.6,
+                          0.6,
+                          0.8
+                        ]
+                      },
+                      {
+                        "node_id": "123e4567-e89b-12d3-a456-426614174002",
+                        "node_kind": "question",
+                        "specificity": [
+                          0.9,
+                          0.7,
+                          0.5
+                        ]
+                      }
+                    ],
+                    "current_node_details": {
+                      "node_id": "123e4567-e89b-12d3-a456-426614174003",
+                      "node_kind": "question",
+                      "specificity": [
+                        0.2,
+                        0.4,
+                        0.4
+                      ],
+                      "correctness_map": {
+                        "answer_id_1": 0,
+                        "answer_id_2": 1,
+                        "answer_id_3": 1,
+                        "answer_id_4": 0
+                      }
+                    },
+                    "confidence": {
+                      "123e4567-e89b-12d3-a456-426614174000": 0.95
+                    },
+                    "visited_node_ids": [
+                      "123e4567-e89b-12d3-a456-426614174001"
+                    ],
+                    "num_node_suggestions": 3
+                  }
+                }
               }
             }
           }
         },
-        "required": [
-          "status"
+        "responses": {
+          "200": {
+            "description": "Suggested next nodes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlackbirdNextNodeResponse"
+                },
+                "examples": {
+                  "BlackbirdNextNodeResponseExample": {
+                    "value": {
+                      "data": {
+                        "suggested_nodes": [
+                          "node_id_1",
+                          "node_id_2",
+                          "node_id_3"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
         ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:{your-lambda-function-arn}/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/topic_modelling/v1/contextualise": {
+      "post": {
+        "summary": "Contextulise or re-contextualise documents in a space.",
+        "description": "Endpoint contextualise or re-contextualise documents in a space.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopicModellingContextuisationRequest"
+              },
+              "examples": {
+                "TopicModellingContextuisationRequestExample": {
+                  "value": {
+                    "org_id": "123e4567-e89b-12d3-a456-426614174000",
+                    "space_id": "123e4567-e89b-12d3-a456-426614174001",
+                    "ctx_type": "default",
+                    "n_topics": 3,
+                    "n_keywords": 5,
+                    "topic_priors": [
+                      "sun, solar",
+                      "dog",
+                      "car, vehicles"
+                    ],
+                    "documents": {
+                      "doc_1": "The Sun is the star at the center of the Solar System. It is a nearly perfect sphere of hot plasma,[18][19] heated to incandescence by nuclear fusion reactions in its core, radiating the energy mainly as visible light, ultraviolet light, and infrared radiation. It is by far the most important source of energy for life on Earth. Its diameter is about 1.39 million kilometres (864,000 miles), or 109 times that of Earth. Its mass is about 330,000 times that of Earth; it accounts for about 99.86% of the total mass of the Solar System.[20] Roughly three quarters of the Sun's mass consists of hydrogen (~73%); the rest is mostly helium (~25%), with much smaller quantities of heavier elements, including oxygen, carbon, neon and iron.[21]",
+                      "doc_2": "The dog or domestic dog (Canis familiaris or Canis lupus familiaris)[4] is a domesticated descendant of the wolf, characterized by an upturning tail. The dog derived from an ancient, extinct wolf,[5][6] and the modern grey wolf is the dog's nearest living relative.[7] The dog was the first species to be domesticated,[8][7] by hunter–gatherers over 15,000 years ago,[6] before the development of agriculture.[1] Their long association with humans has led dogs to be uniquely adapted to human behavior,[9] leading to a large number of domestic individuals[10] and the ability to thrive on a starch-rich diet that would be inadequate for other canids.[11]",
+                      "doc_3": "A car (or automobile) is a wheeled motor vehicle used for transportation. Most definitions of cars say that they run primarily on roads, seat one-to-eight people, have four wheels and mainly transport people rather than goods.[2][3] Cars came into global use during the 20th century, and developed economies depend on them. The year 1886 is regarded as the birth year of the car when German inventor Karl Benz patented his Benz Patent-Motorwagen.[1][4][5] Cars became widely available in the early 20th century. One of the first cars accessible to the masses was the 1908 Model T, an American car manufactured by the Ford Motor Company. Cars were rapidly adopted in the US, where they replaced animal-drawn carriages and carts.[6] In Europe and other parts of the world, demand for automobiles did not increase until after World War II.[6]"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Suggested next nodes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicModellingContextualisationResponse"
+                },
+                "examples": {
+                  "TopicModellingContextuisationRequestExample": {
+                    "value": {
+                      "document_topic_distribution": {
+                        "doc_1": [
+                          0.2,
+                          0.1,
+                          0.7
+                        ],
+                        "doc_2": [
+                          0.9,
+                          0.05,
+                          0.05
+                        ],
+                        "doc_3": [
+                          0.3,
+                          0.6,
+                          0.1
+                        ]
+                      },
+                      "topic_keywords": {
+                        "0": "sun, solar, fusion",
+                        "1": "dog, domestic, species",
+                        "3": "car, vehicles, combustion"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-TopicModellingCdkSt-GibbsLDALambda4872B1B9-xoE2NW0FBx9V/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/topic_modelling/v1/position": {
+      "post": {
+        "summary": "Position documents in a contextualised space .",
+        "description": "Endpoint to position documents in a space without altering the existing contextualisation.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopicModellingPositionRequest"
+              },
+              "examples": {
+                "TopicModellingPositionRequestExample": {
+                  "value": {
+                    "org_id": "123e4567-e89b-12d3-a456-426614174000",
+                    "space_id": "123e4567-e89b-12d3-a456-426614174001",
+                    "ctx_type": "default",
+                    "documents": {
+                      "doc_4": "The Sun's core fuses about 600 million tons of hydrogen into helium every second, converting 4 million tons of matter into energy every second as a result. This energy, which can take between 10,000 and 170,000 years to escape the core, is the source of the Sun's light and heat. When hydrogen fusion in its core has diminished to the point at which the Sun is no longer in hydrostatic equilibrium, its core will undergo a marked increase in density and temperature while its outer layers expand, eventually transforming the Sun into a red giant. It is calculated that the Sun will become sufficiently large to engulf the current orbits of Mercury and Venus, and render Earth uninhabitable – but not for about five billion years. After this, it will shed its outer layers and become a dense type of cooling star known as a white dwarf, and no longer produce energy by fusion, but still glow and give off heat from its previous fusion.",
+                      "doc_5": "In 1999, a study of mitochondrial DNA (mtDNA) indicated that the domestic dog may have originated from the grey wolf, with the dingo and New Guinea singing dog breeds having developed at a time when human communities were more isolated from each other.[15] In the third edition of Mammal Species of the World published in 2005, the mammalogist W. Christopher Wozencraft listed under the wolf Canis lupus its wild subspecies and proposed two additional subspecies which formed the domestic dog clade: familiaris as named by Linneaus in 1758 and dingo named by Meyer in 1793. Wozencraft included hallstromi (the New Guinea singing dog) as another name (junior synonym) for the dingo. Wozencraft referred to the mtDNA study as one of the guides informing his decision.[3] Mammalogists have debated the inclusion of familiaris and dingo together under the domestic dog clade.[16][17]",
+                      "doc_6": "These include rear-reversing cameras, air conditioning, navigation systems, and in-car entertainment. Most cars in use in the early 2020s are propelled by an internal combustion engine, fueled by the combustion of fossil fuels. Electric cars, which were invented early in the history of the car, became commercially available in the 2000s and are predicted to cost less to buy than gasoline cars before 2025.[7][8] The transition from fossil fuels to electric cars features prominently in most climate change mitigation scenarios,[9] such as Project Drawdown's 100 actionable solutions for climate change.[10"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Positioned documents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicModellingContextualisationResponse"
+                },
+                "examples": {
+                  "TopicModellingPositionRequestExample": {
+                    "value": {
+                      "document_topic_distribution": {
+                        "doc_1": [
+                          0.2,
+                          0.1,
+                          0.7
+                        ],
+                        "doc_2": [
+                          0.9,
+                          0.05,
+                          0.05
+                        ],
+                        "doc_3": [
+                          0.3,
+                          0.6,
+                          0.1
+                        ]
+                      },
+                      "topic_keywords": {
+                        "0": "sun, solar, fusion",
+                        "1": "dog, domestic, species",
+                        "3": "car, vehicles, combustion"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-TopicModellingCdk-CtxPositioningLambda5195-kIDumxBgMwdG/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/topic_modelling/v1/org/{org_id}/space/{space_id}/contextualisation": {
+      "get": {
+        "summary": "Get the current contextulisation of the space.",
+        "description": "Endpoint to get the current contextualisation of the space.",
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          {
+            "name": "space_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "123e4567-e89b-12d3-a456-426614174001"
+          },
+          {
+            "name": "ctx_type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "default"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current contextulisation results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicModellingContextualisationResponse"
+                },
+                "examples": {
+                  "TopicModellingPositionRequestExample": {
+                    "value": {
+                      "document_topic_distribution": {
+                        "doc_1": [
+                          0.2,
+                          0.1,
+                          0.7
+                        ],
+                        "doc_2": [
+                          0.9,
+                          0.05,
+                          0.05
+                        ],
+                        "doc_3": [
+                          0.3,
+                          0.6,
+                          0.1
+                        ]
+                      },
+                      "topic_keywords": {
+                        "0": "sun, solar, fusion",
+                        "1": "dog, domestic, species",
+                        "3": "car, vehicles, combustion"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-TopicModellingCdk-FetchLatestCtxLambdaCA8C-Ewgz58VnQ7H0/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/topic_modelling/v1/org/{org_id}/space/{space_id}/quality": {
+      "get": {
+        "summary": "Get the quality metrics for the current contextualisation.",
+        "description": "Endpoint to analyze and return quality metrics for the current contextualisation of the space.",
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          {
+            "name": "space_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "123e4567-e89b-12d3-a456-426614174001"
+          },
+          {
+            "name": "ctx_type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "default"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Quality analysis results for the contextualisation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicModellingQualityResponse"
+                },
+                "examples": {
+                  "TopicModellingQualityExample": {
+                    "value": {
+                      "total_score": 0.85,
+                      "component_scores": {
+                        "centroid_density": 0.82,
+                        "vertex_density": 0.88,
+                        "edge_density": 0.85
+                      },
+                      "topic_scores": [
+                        0.75,
+                        0.82,
+                        0.89
+                      ],
+                      "edge_scores": [
+                        [
+                          "topic1-topic2",
+                          0.67
+                        ],
+                        [
+                          "topic2-topic3",
+                          0.85
+                        ],
+                        [
+                          "topic1-topic3",
+                          0.72
+                        ]
+                      ],
+                      "recommendations": [
+                        "Consider merging topics 2 and 3 due to high similarity",
+                        "Topic 1 could benefit from more distinct keywords"
+                      ],
+                      "topic_information": {
+                        "topic_keywords": {
+                          "0": "sun, solar, fusion",
+                          "1": "dog, domestic, species",
+                          "2": "car, vehicles, combustion"
+                        },
+                        "num_documents": 150,
+                        "num_topics": 3
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error calculating quality scores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "error": "Failed to calculate quality scores: invalid topic distribution"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-TopicModellingCdk-CalculateQualityLambda-XXXXX/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/topic_modelling/v2/contextualise": {
+      "post": {
+        "summary": "Contextulise or re-contextualise documents in a space.",
+        "description": "Endpoint contextualise or re-contextualise documents in a space.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopicModellingContextuisationV2Request"
+              },
+              "examples": {
+                "TopicModellingContextuisationV2RequestExample": {
+                  "value": {
+                    "org_id": "123e4567-e89b-12d3-a456-426614174000",
+                    "space_id": "123e4567-e89b-12d3-a456-426614174001",
+                    "ctx_type": "default",
+                    "n_topics": 3,
+                    "n_keywords": 5,
+                    "topic_priors": [
+                      "sun, solar",
+                      "dog",
+                      "car, vehicles"
+                    ],
+                    "documents_url": "presigned_s3_url"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contextulisation Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicModellingContextualisationV2Response"
+                },
+                "examples": {
+                  "TopicModellingContextuisationV2ResponseExample": {
+                    "value": {
+                      "contextualisation_id": "123e4567-e89b-12d3-a456-426614174000"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-TopicModellingCdkSt-GibbsLDALambda4872B1B9-xoE2NW0FBx9V/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/topic_modelling/v2/position": {
+      "post": {
+        "summary": "Position documents in a contextualised space .",
+        "description": "Endpoint to position documents in a space without altering the existing contextualisation.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopicModellingPositionRequest"
+              },
+              "examples": {
+                "TopicModellingPositionRequestExample": {
+                  "value": {
+                    "org_id": "123e4567-e89b-12d3-a456-426614174000",
+                    "space_id": "123e4567-e89b-12d3-a456-426614174001",
+                    "ctx_type": "default",
+                    "documents": {
+                      "doc_4": "The Sun's core fuses about 600 million tons of hydrogen into helium every second, converting 4 million tons of matter into energy every second as a result. This energy, which can take between 10,000 and 170,000 years to escape the core, is the source of the Sun's light and heat. When hydrogen fusion in its core has diminished to the point at which the Sun is no longer in hydrostatic equilibrium, its core will undergo a marked increase in density and temperature while its outer layers expand, eventually transforming the Sun into a red giant. It is calculated that the Sun will become sufficiently large to engulf the current orbits of Mercury and Venus, and render Earth uninhabitable – but not for about five billion years. After this, it will shed its outer layers and become a dense type of cooling star known as a white dwarf, and no longer produce energy by fusion, but still glow and give off heat from its previous fusion.",
+                      "doc_5": "In 1999, a study of mitochondrial DNA (mtDNA) indicated that the domestic dog may have originated from the grey wolf, with the dingo and New Guinea singing dog breeds having developed at a time when human communities were more isolated from each other.[15] In the third edition of Mammal Species of the World published in 2005, the mammalogist W. Christopher Wozencraft listed under the wolf Canis lupus its wild subspecies and proposed two additional subspecies which formed the domestic dog clade: familiaris as named by Linneaus in 1758 and dingo named by Meyer in 1793. Wozencraft included hallstromi (the New Guinea singing dog) as another name (junior synonym) for the dingo. Wozencraft referred to the mtDNA study as one of the guides informing his decision.[3] Mammalogists have debated the inclusion of familiaris and dingo together under the domestic dog clade.[16][17]",
+                      "doc_6": "These include rear-reversing cameras, air conditioning, navigation systems, and in-car entertainment. Most cars in use in the early 2020s are propelled by an internal combustion engine, fueled by the combustion of fossil fuels. Electric cars, which were invented early in the history of the car, became commercially available in the 2000s and are predicted to cost less to buy than gasoline cars before 2025.[7][8] The transition from fossil fuels to electric cars features prominently in most climate change mitigation scenarios,[9] such as Project Drawdown's 100 actionable solutions for climate change.[10"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Positioned documents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicModellingContextualisationResponse"
+                },
+                "examples": {
+                  "TopicModellingPositionRequestExample": {
+                    "value": {
+                      "document_topic_distribution": {
+                        "doc_4": [
+                          0.2,
+                          0.1,
+                          0.7
+                        ],
+                        "doc_5": [
+                          0.9,
+                          0.05,
+                          0.05
+                        ],
+                        "doc_6": [
+                          0.3,
+                          0.6,
+                          0.1
+                        ]
+                      },
+                      "topic_keywords": {
+                        "0": "sun, solar, fusion",
+                        "1": "dog, domestic, species",
+                        "3": "car, vehicles, combustion"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-TopicModellingCdk-CtxPositioningLambda5195-kIDumxBgMwdG/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/topic_modelling/v2/{contextualisation_id}/contextualisation": {
+      "get": {
+        "summary": "Get the contextulisation of the space.",
+        "description": "Endpoint to get the current contextualisation of the space.",
+        "parameters": [
+          {
+            "name": "contextualisation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest contextulisation results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicModellingContextualisationResponse"
+                },
+                "examples": {
+                  "TopicModellingPositionRequestExample": {
+                    "value": {
+                      "document_topic_distribution": {
+                        "doc_1": [
+                          0.2,
+                          0.1,
+                          0.7
+                        ],
+                        "doc_2": [
+                          0.9,
+                          0.05,
+                          0.05
+                        ],
+                        "doc_3": [
+                          0.3,
+                          0.6,
+                          0.1
+                        ]
+                      },
+                      "topic_keywords": {
+                        "0": "sun, solar, fusion",
+                        "1": "dog, domestic, species",
+                        "3": "car, vehicles, combustion"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-TopicModellingCdk-FetchLatestCtxLambdaCA8C-Ewgz58VnQ7H0/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/topic_modelling/v2/org/{org_id}/space/{space_id}/contextualisation": {
+      "get": {
+        "summary": "Get the current contextulisation of the space.",
+        "description": "Endpoint to get the current contextualisation of the space.",
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          {
+            "name": "space_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "123e4567-e89b-12d3-a456-426614174001"
+          },
+          {
+            "name": "ctx_type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "default"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest contextulisation results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicModellingContextualisationResponse"
+                },
+                "examples": {
+                  "TopicModellingPositionRequestExample": {
+                    "value": {
+                      "document_topic_distribution": {
+                        "doc_1": [
+                          0.2,
+                          0.1,
+                          0.7
+                        ],
+                        "doc_2": [
+                          0.9,
+                          0.05,
+                          0.05
+                        ],
+                        "doc_3": [
+                          0.3,
+                          0.6,
+                          0.1
+                        ]
+                      },
+                      "topic_keywords": {
+                        "0": "sun, solar, fusion",
+                        "1": "dog, domestic, species",
+                        "3": "car, vehicles, combustion"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-TopicModellingCdk-FetchLatestCtxLambdaCA8C-Ewgz58VnQ7H0/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/topic_modelling/v2/org/{org_id}/space/{space_id}/quality": {
+      "get": {
+        "summary": "Get the quality metrics for the current contextualisation.",
+        "description": "Endpoint to analyze and return quality metrics for the current contextualisation of the space.",
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          {
+            "name": "space_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "123e4567-e89b-12d3-a456-426614174001"
+          },
+          {
+            "name": "ctx_type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "default"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Quality analysis results for the contextualisation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicModellingQualityResponse"
+                },
+                "examples": {
+                  "TopicModellingQualityExample": {
+                    "value": {
+                      "total_score": 0.85,
+                      "component_scores": {
+                        "centroid_density": 0.82,
+                        "vertex_density": 0.88,
+                        "edge_density": 0.85
+                      },
+                      "topic_scores": [
+                        0.75,
+                        0.82,
+                        0.89
+                      ],
+                      "edge_scores": [
+                        [
+                          "topic1-topic2",
+                          0.67
+                        ],
+                        [
+                          "topic2-topic3",
+                          0.85
+                        ],
+                        [
+                          "topic1-topic3",
+                          0.72
+                        ]
+                      ],
+                      "recommendations": [
+                        "Consider merging topics 2 and 3 due to high similarity",
+                        "Topic 1 could benefit from more distinct keywords"
+                      ],
+                      "topic_information": {
+                        "topic_keywords": {
+                          "0": "sun, solar, fusion",
+                          "1": "dog, domestic, species",
+                          "2": "car, vehicles, combustion"
+                        },
+                        "num_documents": 150,
+                        "num_topics": 3
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error calculating quality scores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "error": "Failed to calculate quality scores: invalid topic distribution"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:666774207884:function:Staging-TopicModellingCdk-CalculateQualityLambda-XXXXX/invocations",
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TopicModellingContextualisationV2Response": {
+        "type": "object",
+        "properties": {
+          "contextualisation_id": {
+            "type": "string",
+            "description": "Id of the new contextualisation."
+          }
+        },
+        "required": [
+          "contextualisation_id"
+        ]
+      },
+      "TopicModellingContextuisationV2Request": {
+        "type": "object",
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the organization."
+          },
+          "space_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for space."
+          },
+          "n_topics": {
+            "type": "integer",
+            "description": "The desired number of topics to extract."
+          },
+          "n_keywords": {
+            "type": "integer",
+            "description": "The number of keywords per topic to retrieve."
+          },
+          "topic_priors": {
+            "type": "array",
+            "description": "A list of topic prior keywords, where each element is an array of strings representing related terms.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "documents_url": {
+            "type": "string",
+            "description": "Presigned s3 url containing all nodes textual data."
+          },
+          "ctx_type": {
+            "type": "string",
+            "description": "Type of contextulisation."
+          }
+        },
+        "required": [
+          "org_id",
+          "space_id",
+          "n_topics",
+          "n_keywords",
+          "topic_priors",
+          "documents_url",
+          "ctx_type"
+        ]
+      },
+      "TopicModellingQualityResponse": {
+        "type": "object",
+        "properties": {
+          "total_score": {
+            "type": "number",
+            "description": "Overall quality score for the contextualisation"
+          },
+          "component_scores": {
+            "type": "object",
+            "description": "Breakdown of individual component quality scores",
+            "properties": {
+              "centroid_density": {
+                "type": "number"
+              },
+              "vertex_density": {
+                "type": "number"
+              },
+              "edge_density": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "centroid_density",
+              "vertex_density",
+              "edge_density"
+            ]
+          },
+          "topic_scores": {
+            "type": "array",
+            "description": "Individual quality scores for each topic",
+            "items": {
+              "type": "number"
+            }
+          },
+          "edge_scores": {
+            "type": "array",
+            "description": "Scores for relationships between topic pairs",
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          "recommendations": {
+            "type": "array",
+            "description": "List of recommendations for improving topic quality",
+            "items": {
+              "type": "string"
+            }
+          },
+          "topic_information": {
+            "type": "object",
+            "properties": {
+              "topic_keywords": {
+                "type": "object",
+                "description": "Mapping of topic IDs to their keywords",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "num_documents": {
+                "type": "integer",
+                "description": "Total number of documents in the analysis"
+              },
+              "num_topics": {
+                "type": "integer",
+                "description": "Total number of topics in the model"
+              }
+            },
+            "required": [
+              "topic_keywords",
+              "num_documents",
+              "num_topics"
+            ]
+          }
+        },
+        "required": [
+          "total_score",
+          "component_scores",
+          "topic_scores",
+          "edge_scores",
+          "recommendations",
+          "topic_information"
+        ]
+      },
+      "TopicModellingContextualisationResponse": {
+        "type": "object",
+        "properties": {
+          "document_topic_distribution": {
+            "type": "object",
+            "description": "Mapping of document IDs to their topic distributions.",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "topic_keywords": {
+            "type": "object",
+            "description": "Mapping of topic IDs to lists of associated keywords.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "document_topic_distribution",
+          "topic_keywords"
+        ]
+      },
+      "TopicModellingPositionRequest": {
+        "type": "object",
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the organization."
+          },
+          "space_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for space."
+          },
+          "documents": {
+            "type": "object",
+            "description": "A mapping from document identifiers to their textual content.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "org_id",
+          "space_id",
+          "documents"
+        ]
+      },
+      "TopicModellingContextuisationRequest": {
+        "type": "object",
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the organization."
+          },
+          "space_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for space."
+          },
+          "n_topics": {
+            "type": "integer",
+            "description": "The desired number of topics to extract."
+          },
+          "n_keywords": {
+            "type": "integer",
+            "description": "The number of keywords per topic to retrieve."
+          },
+          "topic_priors": {
+            "type": "array",
+            "description": "A list of topic prior keywords, where each element is an array of strings representing related terms.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "documents": {
+            "type": "object",
+            "description": "A mapping from document identifiers to their textual content.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "ctx_type": {
+            "type": "string",
+            "description": "Type of contextulisation."
+          }
+        },
+        "required": [
+          "org_id",
+          "space_id",
+          "n_topics",
+          "documents"
+        ]
+      },
+      "searchIndexingStatusResponse": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "not_found",
+                "in_progress",
+                "success",
+                "failed",
+                "removed"
+              ]
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
         "example": {
           "97f922c5-9f04-4afa-92d6-65aa93fa58e7": {
             "status": "in_progress"
@@ -1012,6 +2419,14 @@
             "type": "integer"
           }
         },
+        "required": [
+          "user",
+          "organization",
+          "knowledge_spaces",
+          "node_types",
+          "query",
+          "page_number"
+        ],
         "example": {
           "user": "a34516af-8888-0000-aa66-793428dcf3e4",
           "organization": "a5a946b7-2603-49a9-8f52-c730a7b56002",
@@ -1036,12 +2451,15 @@
           "node_uuid": {
             "type": "string"
           },
+          "space_uuid": {
+            "type": "string"
+          },
           "node_kind": {
             "type": "string"
           },
           "score": {
             "type": "number",
-            "format": "float64"
+            "format": "float"
           },
           "original_text": {
             "type": "string"
@@ -1051,25 +2469,28 @@
           },
           "start": {
             "type": "integer",
-            "format": "int64"
+            "nullable": true
           },
           "end": {
             "type": "integer",
-            "format": "int64"
+            "nullable": true
           },
           "page": {
             "type": "integer",
-            "format": "int64"
+            "nullable": true
           },
           "coordinates": {
             "type": "array",
             "items": {
-              "type": "integer",
-              "format": "int64"
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             }
           },
           "href": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "match": {
             "type": "string"
@@ -1079,13 +2500,15 @@
       "searchResponse": {
         "type": "object",
         "properties": {
+          "query": {
+            "type": "string"
+          },
           "num_results": {
-            "type": "integer",
-            "format": "int64"
+            "type": "integer"
           },
           "exec_time": {
             "type": "number",
-            "format": "float64"
+            "format": "float"
           },
           "has_node_types": {
             "type": "array",
@@ -1100,6 +2523,13 @@
             }
           }
         },
+        "required": [
+          "query",
+          "num_results",
+          "exec_time",
+          "has_node_types",
+          "results"
+        ],
         "example": {
           "query": "beef pieces",
           "num_results": 1,
@@ -1115,7 +2545,7 @@
               "node_kind": "document",
               "space_uuid": "b4288731-f301-4778-ac81-bd21ce84bdf5",
               "score": 0.8899998,
-              "original_text": "500g\t\r  of cheap beef pieces\t\r  (stewing\t\r  steak usually is cheap) ",
+              "original_text": "500g of cheap beef pieces (stewing steak usually is cheap)",
               "title": "Cooking with Ingredients",
               "start": null,
               "end": null,
@@ -1138,10 +2568,10 @@
         "type": "object",
         "properties": {
           "Reference number": {
-            "type": "string"
+            "type": "integer"
           },
           "Node uuid": {
-            "type": "string"
+            "type": "integer"
           }
         }
       },
@@ -1161,18 +2591,19 @@
             }
           }
         },
+        "required": [
+          "summary",
+          "returned_results",
+          "references"
+        ],
         "example": {
           "summary": "I am a summary of some results",
           "returned_results": "These are some returned results",
           "references": [
-            [
-              {
-                "Reference number": 1
-              },
-              {
-                "Node uuid": 1234
-              }
-            ]
+            {
+              "Reference number": 1,
+              "Node uuid": 1234
+            }
           ]
         }
       },
@@ -1180,16 +2611,59 @@
         "type": "object",
         "properties": {
           "v2_results": {
-            "type": "json",
-            "items": {
-              "$ref": "#/components/schemas/searchResponse"
-            }
+            "$ref": "#/components/schemas/searchResponse"
           },
           "summary": {
             "type": "string"
           }
         },
-        "example": "{\"v2_results\": {\"user\": \"a34516af-8888-0000-aa66-793428dcf3e4\", \"organization\": \"a5a946b7-2603-49a9-8f52-c730a7b56002\", \"knowledge_spaces\": [\"d22206af-46f6-4482-bb06-793428dcf3e4\", \"b4288731-f301-4778-ac81-bd21ce84bdf5\"], \"node_types\": [\"document\", \"video\"], \"query\": \"beef pieces\", \"page_number\": 1}}\nI am a summary of some results"
+        "example": {
+          "v2_results": {
+            "user": "a34516af-8888-0000-aa66-793428dcf3e4",
+            "organization": "a5a946b7-2603-49a9-8f52-c730a7b56002",
+            "knowledge_spaces": [
+              "d22206af-46f6-4482-bb06-793428dcf3e4",
+              "b4288731-f301-4778-ac81-bd21ce84bdf5"
+            ],
+            "node_types": [
+              "document",
+              "video"
+            ],
+            "query": "beef pieces",
+            "page_number": 1,
+            "num_results": 1,
+            "exec_time": 3.69,
+            "has_node_types": [
+              "document",
+              "video"
+            ],
+            "results": [
+              {
+                "uuid": "be07f02e-3f60-4d9e-b080-7dc9005afbd5",
+                "node_uuid": "35d314c0-4542-4e72-939b-979ef07cb15f",
+                "node_kind": "document",
+                "space_uuid": "b4288731-f301-4778-ac81-bd21ce84bdf5",
+                "score": 0.8899998,
+                "original_text": "500g of cheap beef pieces (stewing steak usually is cheap)",
+                "title": "Cooking with Ingredients",
+                "start": null,
+                "end": null,
+                "page": 3,
+                "coordinates": [
+                  [
+                    72.12010192871094,
+                    652.975341796875,
+                    404.9890594482422,
+                    669.2617340087891
+                  ]
+                ],
+                "href": null,
+                "match": "High"
+              }
+            ]
+          },
+          "summary": "I am a summary of some results"
+        }
       },
       "conceptTracksIndexingStatusResponse": {
         "type": "object",
@@ -1227,7 +2701,7 @@
             "items": {
               "type": "array",
               "items": {
-                "type": "integer"
+                "type": "number"
               }
             }
           }
@@ -1294,29 +2768,235 @@
       "conceptTracksNodeDetailsResponse": {
         "type": "object",
         "properties": {
-          "status": {
+          "node_id": {
             "type": "string"
+          },
+          "node_title": {
+            "type": "string"
+          },
+          "node_text": {
+            "type": "string"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
-          "status"
+          "node_id",
+          "node_title",
+          "node_text",
+          "coordinates",
+          "keywords"
         ],
         "example": {
-          "status": "in_progress"
+          "node_id": "0ffa6f60-d8ea-48f7-a464-737c698609e7",
+          "node_title": "Sample Node",
+          "node_text": "This is the detailed text of the node.",
+          "coordinates": [
+            [
+              1,
+              2,
+              3,
+              4
+            ],
+            [
+              5,
+              6,
+              7,
+              8
+            ]
+          ],
+          "keywords": [
+            "keyword1",
+            "keyword2"
+          ]
         }
       },
       "conceptTracksModelRequestResponse": {
         "type": "object",
         "properties": {
-          "status": {
-            "type": "string"
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "default": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "description"
+              ]
+            }
           }
         },
         "required": [
-          "status"
+          "models"
         ],
         "example": {
-          "status": "in_progress"
+          "models": [
+            {
+              "id": "e4cc04f3-f5ed-49f1-be63-482204f14180",
+              "name": "LDA",
+              "description": "desc",
+              "default": true
+            },
+            {
+              "id": "fe111234-f5ed-49f1-be63-482204f14180",
+              "name": "Transformers",
+              "description": "desc"
+            }
+          ]
+        }
+      },
+      "conceptTracksV3TextLocationRequest": {
+        "type": "object",
+        "properties":{
+          "textUrl": {
+            "type": "string"
+          }
+        },
+        "example":{
+          "textUrl": "https://research-and-development-data.s3.eu-west-1.amazonaws.com/wedad-test/test.json?response-content-disposition=inline&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAsaCWV1LXdlc3QtMSJIMEYCIQDbAo%2BT%2BuTrJeaXn3Ma5mkIaixke8%2B4YW%2BJOqXKe4UCcwIhAKhSza%2FlC6qNaMdDU1qIvHtl7S62x4B7StDRhLMi9F19KscECEQQBBoMNDg4NjgyMDY2MjcxIgxVyVQoneX2GWMI1HkqpATYrwjV%2BruTgwBZ6sHzUnFdeJCooCz0iqfS6Mixl64CjEmCuWgmU7O5UKFnpzSKxj89hKaG9LHLqjDfS7Nxxm3AGlatdUEP2JPFOwPAcabibaUXl8m6WjYNrYef0p4NUBSPspz8aPrUfj7hea8MTtp3V7qwX1r9PP%2B438Ec69yR0j0vR%2BGH3CVFqB9Z9zXhubwoq%2B1VmqY7PglchYllr0RjYId5Mr72E9wPxsJM1Bc1Gmzc47IuXh56XWDZvLg3EacovCzJOxzAPhbJnZV8rRE%2FeUPkR3m%2Fz9lXY7ZLR8BkAmp16sHLHR5l6dC33NSu6wslTyaAmVxVQAgzQMC3syspvC0M8KXLXFUeX0nG3Tt48rubhWV56R%2B%2F6l0cPKskS5GkSCcqH3xa7x2zRAb93HlXfTKP%2B99ekMSGj83TAMYd8tOy4585qD%2Fz%2BsY%2FDrm7CU9yhbMPAKvoWelmDE62u9Q5N1MlHBmims3ZyMmYtWLMkDjyJRELTX7COAE40aDVBsJ4oeSOoNWcublpvP4FWIzWbxDkC3wqHO4KF%2BI%2FboI7bMs7Q5tjNQh08dHJWKfQU4a0gUEOQykKF%2FeDlSwmoz4WQBDR6uNLKz33q3wDrpJasozvdLD6dmpMkLAq9ByPMiWmUeV5zHteEGfD%2FACoZfeQ9U%2BOpIezai3UXqRY1N%2FWDihyAaGlfDxhhkFbASLTP9z2eOkubexblEtQbq05%2FgI21GknQDDCyPa9BjrEAhll48Ys4aYeL70tRXn8PtbuOP6qly3QQ7h21LMItDkDoL2cIGhBq%2FrcvSr%2BIablYYoV8eQ9MLFeR21hOznd4v5CC3vZ8twBpkZSEoiZfTpK4BvW0LJFavNXSYnyV2XsL%2FYOANhwDh%2Bp8Rv1T7o8D28vK1OhWiI0bYdzTmyI%2Bx8L1K9YjtRWom8CEo8daQSu5VEHJyPbilbLI04Riys6o%2B1jfC9GNRDWAKNKWorUaQfJQJYlCptaZO%2Frg%2BmN3pyzprj46lyS9%2B%2F1Ijn0IS77AQON0lEGZgDEcDmcrQMTMuMTf%2FLgqGLPVTkGUI6%2Fyk9kH2MesnOc4M6nmRV%2B61b62VW4sKUFXNwjtyyfENpHIb3XWCZke1iO3eFAEN7WupAKMz77b6Jrv1ApN9%2BIuRSxoCFiYkThCeOolN8v5I%2F7mHR7DvVhVw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAXDR5YSFPWGC3UC35%2F20250225%2Feu-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250225T110723Z&X-Amz-Expires=43200&X-Amz-SignedHeaders=host&X-Amz-Signature=cb1c252e6bfe41e7913221b81e0a32233b881f1c8cc41217283ca020752bbb44"
+        }
+      },
+      "conceptTracksV3TextLocationResponse": {
+        "type": "object",
+        "properties": {
+          "request_id": {
+            "type": "string"
+          }
+        },
+        "example":{
+          "request_id": "d22206af-46f6-4482-bb06-793428dcf3e4"
+        }
+      },
+      "conceptTracksV3NodeSuggestionsResponse": {
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "description": "A list of nodes identified in the analyzed text. Each node includes a title, unique ID, and metadata.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "The name or label of the concept or entity identified in the text."
+                },
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "A unique identifier for the node, in UUID format."
+                },
+                "metadata": {
+                  "type": "object",
+                  "description": "Additional information about the node's position in the original text.",
+                  "properties": {
+                    "start": {
+                      "type": "integer",
+                      "description": "The starting character position of the node in the original text (0-based index)."
+                    },
+                    "end": {
+                      "type": "integer",
+                      "description": "The ending character position of the node in the original text (inclusive)."
+                    }
+                  },
+                  "required": ["start", "end"]
+                }
+              },
+              "required": ["title", "id", "metadata"]
+            }
+          }
+        },
+        "required": ["nodes"],
+        "example": {
+          "nodes": [
+            {
+              "title": "sun dog",
+              "id": "e4cc04f3-f5ed-49f1-be63-482204f14180",
+              "metadata": {
+                "start": 0,
+                "end": 150
+              }
+            },
+            {
+              "title": "moon cat",
+              "id": "7c7d4f3d-b2e9-4b1a-8f4c-c45d83c21890",
+              "metadata": {
+                "start": 151,
+                "end": 300
+              }
+            }
+          ]
+        }
+      },
+      "conceptTracksV3NodeDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "description": "The uuid of the node"
+          },
+          "node_title": {
+            "type": "string",
+            "description": "The name or label of the concept or entity identified in the text."
+          },
+          "node_text": {
+            "type": "string",
+            "description": "The text associated with the node"
+          },
+          "start": {
+            "type": "integer",
+            "description": "The index of the first paragraph in the node"
+          },
+          "end": {
+            "type": "integer",
+            "description": "The index of the last parageaph of the node"
+          },
+          "keywords": {
+            "type": "array",
+            "description": "List of keywords generated from the node text",
+            "items": {
+              "type": "string",
+              "description": "A single generated keyword"
+            }
+          }
+        }
+      },
+      "notFoundErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Not found error message"
+          }
+        },
+        "example": {
+          "error": "Not found"
         }
       },
       "dcsSuggestionsResponse": {
@@ -1391,6 +3071,9 @@
             }
           }
         },
+        "required": [
+          "file_ids"
+        ],
         "example": {
           "file_ids": [
             "lab/0b37cc06-e72f-40e3-a5db-a0861142b134/Electric fields",
@@ -1442,6 +3125,42 @@
           "request_type": "mcq"
         }
       },
+      "questionGenerationQueryV3": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "request_type": {
+            "type": "string",
+            "enum": [
+              "multiple_questions",
+              "fill_in_blanks",
+              "mcq"
+            ]
+          },
+          "language_code": {
+            "type": "string",
+            "enum": [
+              "en-GB",
+              "en-US",
+              "ar-QA"
+            ]
+          },
+          "previous_question": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "request_type"
+        ],
+        "example": {
+          "text": "The North East Line is a high-capacity Mass Rapid Transit (MRT) line in Singapore. Operated by SBS Transit, the 20-kilometre (12 mi) line runs from HarbourFront station in southern Singapore to Punggol station in the northeast via Chinatown, Little India, Serangoon and Hougang. Completed at a cost of S$5 billion, the line began operating 14 of its 16 stations on 20 June 2003.",
+          "request_type": "mcq",
+          "language_code": "ar-QA"
+        }
+      },
       "questionGenerationResponseMultipleQuestions": {
         "type": "object",
         "properties": {
@@ -1465,7 +3184,7 @@
         "example": {
           "questions": [
             "What is a corpus?",
-            "How the corpus should be constructed?",
+            "How should the corpus be constructed?",
             "What data is used to build the corpus?"
           ],
           "answers": [
@@ -1541,7 +3260,7 @@
           ]
         }
       },
-      "freeformGraderQuery": {
+      "openQuestionsGraderQuery": {
         "type": "object",
         "properties": {
           "question": {
@@ -1565,7 +3284,7 @@
           "model_answer": "Cryptocurrency is a digital or virtual currency that uses cryptography for security and operates on a decentralized platform, typically based on blockchain technology."
         }
       },
-      "freeformGraderResponse": {
+      "openQuestionsGraderResponse": {
         "type": "object",
         "properties": {
           "score": {
@@ -1581,7 +3300,7 @@
         ],
         "example": {
           "score": 80,
-          "explanation": "student got the answer roughly right."
+          "explanation": "Student got the answer roughly right."
         }
       },
       "searchAnalyticsQuery": {
@@ -1591,11 +3310,9 @@
             "type": "string"
           },
           "user_ids": {
+            "type": "array",
             "items": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "type": "string"
             }
           },
           "start_date": {
@@ -1707,8 +3424,232 @@
         },
         "example": {
           "node_uuid": "3271f11a-1ea5-4f9e-a286-44efab57b4af",
-          "summary": "The document discusses the composition of the Sun. Key points:\n\n1. The Sun is composed primarily of hydrogen (74.9%) and helium (23.8%). Heavier elements (\"metals\") make up less than 2%. \n\n2. The hydrogen and helium were produced in the first 20 minutes after the Big Bang. Heavier elements were produced by previous generations of stars and spread through supernovae explosions.\n\n3. Originally the Sun had 71.1% hydrogen, 27.4% helium, 1.5% heavier elements. Gravity caused heavier elements to settle towards the core over time.\n\n4. In the core, hydrogen fused into helium over billions of years. The core now has ~60% helium. An inner helium core is starting to form.\n\n5. In 5 billion years helium buildup will cause the Sun to become a red giant when it exits the main sequence.\n\n6. The composition of the Sun's photosphere is considered representative of the primordial solar system composition. It's measured by spectroscopy of the photosphere and meteorites.\n"
+          "summary": "The document discusses the composition of the Sun. Key points:\n\n1. The Sun is composed primarily of hydrogen (74.9%) and helium (23.8%). Heavier elements (\"metals\") make up less than 2%.\n\n2. The hydrogen and helium were produced in the first 20 minutes after the Big Bang. Heavier elements were produced by previous generations of stars and spread through supernovae explosions.\n\n3. Originally the Sun had 71.1% hydrogen, 27.4% helium, 1.5% heavier elements. Gravity caused heavier elements to settle towards the core over time.\n\n4. In the core, hydrogen fused into helium over billions of years. The core now has ~60% helium. An inner helium core is starting to form.\n\n5. In 5 billion years helium buildup will cause the Sun to become a red giant when it exits the main sequence.\n\n6. The composition of the Sun's photosphere is considered representative of the primordial solar system composition. It's measured by spectroscopy of the photosphere and meteorites."
         }
+      },
+      "BlackbirdNextNodeRequest": {
+        "type": "object",
+        "properties": {
+          "num_concepts": {
+            "type": "integer",
+            "description": "Number of concepts."
+          },
+          "specificity_ordering": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Ordering of concepts based on specificity."
+          },
+          "space_node_details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NodeDetail"
+            },
+            "description": "Details of nodes in the space."
+          },
+          "current_node_details": {
+            "$ref": "#/components/schemas/CurrentNodeDetail",
+            "description": "Details of the current node."
+          },
+          "confidence": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Confidence scores for nodes."
+          },
+          "visited_node_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of visited node IDs."
+          },
+          "num_node_suggestions": {
+            "type": "integer",
+            "description": "Number of node suggestions required."
+          }
+        },
+        "required": [
+          "num_concepts",
+          "specificity_ordering",
+          "space_node_details",
+          "current_node_details",
+          "confidence",
+          "visited_node_ids",
+          "num_node_suggestions"
+        ]
+      },
+      "BlackbirdNextNodeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "suggested_nodes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of suggested node IDs."
+              }
+            },
+            "required": [
+              "suggested_nodes"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "NodeDetail": {
+        "type": "object",
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "description": "Unique identifier for the node."
+          },
+          "node_kind": {
+            "type": "string",
+            "enum": [
+              "document",
+              "video",
+              "question"
+            ],
+            "description": "Type of the node."
+          },
+          "specificity": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Specificity scores for the node."
+          }
+        },
+        "required": [
+          "node_id",
+          "node_kind",
+          "specificity"
+        ]
+      },
+      "CurrentNodeDetail": {
+        "type": "object",
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "description": "Unique identifier for the current node."
+          },
+          "node_kind": {
+            "type": "string",
+            "enum": [
+              "document",
+              "video",
+              "question"
+            ],
+            "description": "Type of the current node."
+          },
+          "specificity": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Specificity scores for the current node."
+          },
+          "correctness_map": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "enum": [
+                0,
+                1
+              ]
+            },
+            "description": "Map of answer IDs to correctness (0 or 1)."
+          }
+        },
+        "required": [
+          "node_id",
+          "node_kind",
+          "specificity",
+          "correctness_map"
+        ]
+      },
+      "GetVideoNodeSuggestionsResponse": {
+        "type": "object",
+        "properties": {
+          "file_id": {
+            "type": "string"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VideoNodeSuggestionData"
+            },
+            "description": "Array of node suggestion data."
+          }
+        },
+        "required": [
+          "file_id",
+          "details"
+        ]
+      },
+      "VideoNodeSuggestionData": {
+        "type": "object",
+        "properties": {
+          "concept_keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "node_title": {
+            "type": "string"
+          },
+          "node_text": {
+            "type": "string"
+          },
+          "dominant_concept_probability": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "description": "Array of [time, probability] pairs."
+          },
+          "start_time": {
+            "type": "number",
+            "format": "float"
+          },
+          "end_time": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "required": [
+          "concept_keywords",
+          "node_title",
+          "node_text",
+          "dominant_concept_probability",
+          "start_time",
+          "end_time"
+        ]
+      },
+      "VideoNodeErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ]
       }
     },
     "securitySchemes": {
