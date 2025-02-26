@@ -490,7 +490,7 @@
 
       }
     },
-    "concept_tracks/v3/{request_id}/node_suggestion": {
+    "/concept_tracks/v3/{request_id}/node_suggestions": {
       "get": {
         "summary": "Retrieve node suggestions for a request",
         "description": "Fetches a list of nodes generated from the text associated with the specified request ID. Each node represents a concept or entity identified in the text, including its title, unique ID, and metadata about its position in the original text.",
@@ -533,7 +533,7 @@
         }
       }
     },
-    "concept_tracks/v3/{request_id}/node_details/{node_id}": {
+    "/concept_tracks/v3/{request_id}/node_details/{node_id}": {
       "get": {
         "summary": "Retrieve node details for a request and a node",
         "description": "Fetches the details of a node specified by request_id and node_id",
@@ -3652,6 +3652,11 @@
         ]
       }
     },
+    "security": [
+      {
+        "ApiKeyAuth": []
+      }
+    ],
     "securitySchemes": {
       "api_key": {
         "type": "apiKey",
