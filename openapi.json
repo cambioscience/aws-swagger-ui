@@ -445,7 +445,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
         }
     },
     "/concept_tracks/v3/bulk_status": {
@@ -486,8 +491,12 @@
               }
             }
           }
-        }
-
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
       }
     },
     "/concept_tracks/v3/{request_id}/node_suggestions": {
@@ -530,7 +539,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
       }
     },
     "/concept_tracks/v3/{request_id}/node_details/{node_id}": {
